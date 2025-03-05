@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Standalone Binance Client
-A version of the BinanceClient that works without PySide2 dependencies.
+This is a version of BinanceClient that doesn't depend on PySide2.
 """
 
 from binance.client import Client
@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 import ta
-import time, math, datetime
+import time
+import math
+import datetime
 import threading
 
-class StandaloneClient:
-    """A standalone Binance client without Qt dependencies"""
-    
+class BinanceClient:
     def __init__(self, api_key, api_secret):
         self.api_key = api_key
         self.api_secret = api_secret
@@ -24,24 +24,167 @@ class StandaloneClient:
         self.asset = "BTC"
         self.pair = "BTCBUSD"
         self.interval = "1m"
+        self.df_length = 30
 
-        self.client = Client(api_key, api_secret)
-        self.df = None
-        self.df_length = 100
-        
-        self.position = False
-        self.position_size = 0
-        self.position_price = 0
-        self.position_time = 0
-        
-        self.stop_loss = 0
-        self.take_profit = 0
-        
-        self.balance = 0
-        self.equity = []
-        
-        self.running = False
-        self.thread = None
+        self.tp = [0.0002, 0.0004]
+        self.tp_ratio = [0.5, 0.5]
+        self.tp1_price = None
+
+        self.trail_stop = 0.85
+        self.min_trail = 0.05
+        self.max_price = None
+        self.TS = None
+        self.trail_stop_enabled = True
+
+        self.mode = "trade"
+        self.position = -1
+
+        self.trade_history = []
+        self.position_open = False
+        self.position_data = {}
+        self.reset_position()
+
+        self.out_data = {}
+
+        # backtesting data:
+        self.backtest_initial_balance = 100000
+        self.equity_history = []
+        self.backtest_epoch = 0
+        self.backtest_start = self.df_length
+        self.asset_price = None
+        self.plot = False
+
+        self.trading_delay = 0.5
+        self.client = Client(self.api_key, self.api_secret)
+        self.update_time = 0
+        self.balances = {}
+        self.tickers = {}
+        self.df = pd.DataFrame()
+
+        # Create a data update thread
+        self.data_thread = None
+        self._stop_event = threading.Event()
+
+    def start_data_thread(self):
+        """Start a thread to update data periodically"""
+        self._stop_event.clear()
+        self.data_thread = threading.Thread(target=self._data_loop)
+        self.data_thread.daemon = True
+        self.data_thread.start()
+
+    def stop_data_thread(self):
+        """Stop the data update thread"""
+        if self.data_thread:
+            self._stop_event.set()
+            self.data_thread.join()
+
+    def _data_loop(self):
+        """Background thread to update data"""
+        while not self._stop_event.is_set():
+            try:
+                self.update()
+            except Exception as e:
+                print(f"Error in data loop: {str(e)}")
+            time.sleep(0.8)
+
+    def reset_position(self):
+        self.position_data = {
+            "open_time": None,
+            "close_time": None,
+            "open_price": None,
+            "close_price": None,
+            "profit": None,
+            "trail_stop": False
+        }
+
+    def update(self):
+        # print("BinanceClient.update()")
+
+        # get account balance
+        try:
+            binance_info = self.client.get_account()
+        except Exception as e:
+            print(f"Cannot get account info from binance: {str(e)}")
+            return
+
+        self.update_time = time.time()
+
+        balance = binance_info['balances']
+
+        balances = {}
+        for i in balance:
+            if float(i["free"]) > 0.0:
+                balances[i["asset"]] = float(i["free"])
+        self.balances = balances
+
+        # get bid & ask price
+        try:
+            tickers = self.client.get_orderbook_tickers()
+        except Exception as e:
+            print(f"Cannot get ticker info from binance: {str(e)}")
+            return
+
+        for i in tickers:
+            if i["symbol"] == self.pair:
+                self.tickers[self.pair] = {"ask": float(i["askPrice"]), "bid": float(i["bidPrice"])}
+
+        self.df = self.get_candles()
+
+    def trade_init(self):
+        self.update()
+        self.start_data_thread()
+        time.sleep(0.5)
+
+    def trade_loop(self):
+        print("BinanceClient.trade()")
+
+        while True:
+            if self.mode == "trade":
+                time.sleep(self.trading_delay)
+                self.data_process()
+                self.manager()
+
+    def data_process(self):
+        """Process the data for trading decisions"""
+        # Implement your trading logic here
+        pass
+
+    def manager(self):
+        """Manage trading positions"""
+        # Implement your position management logic here
+        pass
+
+    def get_candles(self):
+        """Get candlestick data from Binance"""
+        try:
+            # Get klines (candlestick data)
+            klines = self.client.get_klines(
+                symbol=self.pair,
+                interval=self.interval,
+                limit=self.df_length
+            )
+            
+            # Convert to DataFrame
+            df = pd.DataFrame(klines, columns=[
+                'timestamp', 'open', 'high', 'low', 'close', 'volume',
+                'close_time', 'quote_asset_volume', 'number_of_trades',
+                'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
+            ])
+            
+            # Convert string values to float
+            df['open'] = df['open'].astype(float)
+            df['high'] = df['high'].astype(float)
+            df['low'] = df['low'].astype(float)
+            df['close'] = df['close'].astype(float)
+            df['volume'] = df['volume'].astype(float)
+            
+            # Convert timestamp to datetime
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            
+            return df
+        except Exception as e:
+            print(f"Error getting candles: {str(e)}")
+            return pd.DataFrame()
 
     def start(self):
         """Start the client"""
@@ -65,42 +208,6 @@ class StandaloneClient:
                 print(f"Error in update loop: {str(e)}")
             time.sleep(1.0)
 
-    def update(self):
-        """Update market data and account information"""
-        # Get account balance
-        try:
-            account = self.client.get_account()
-            for balance in account['balances']:
-                if balance['asset'] == self.base_asset:
-                    self.balance = float(balance['free'])
-        except Exception as e:
-            print(f"Error getting account balance: {str(e)}")
-            
-        # Update market data
-        self.get_candles()
-
-    def trade_init(self):
-        """Initialize for trading"""
-        print("Initializing trading...")
-        self.position = False
-        self.position_size = 0
-        self.position_price = 0
-        self.position_time = 0
-        self.stop_loss = 0
-        self.take_profit = 0
-        self.equity = [1000]  # Starting equity for tracking
-        
-    def backtest_init(self):
-        """Initialize for backtesting"""
-        print("Initializing backtesting...")
-        self.position = False
-        self.position_size = 0
-        self.position_price = 0
-        self.position_time = 0
-        self.stop_loss = 0
-        self.take_profit = 0
-        self.equity = [1000]  # Starting equity for backtesting
-        
     def write_order(self, text):
         """Log order information"""
         with open("order.log", "a") as f:
@@ -121,15 +228,6 @@ class StandaloneClient:
         print("Executing sell order...")
         self.write_order(f"SELL {self.pair}")
         
-    def reset_position(self):
-        """Reset position tracking"""
-        self.position = False
-        self.position_size = 0
-        self.position_price = 0
-        self.position_time = 0
-        self.stop_loss = 0
-        self.take_profit = 0
-        
     def open_position(self, epoch, price):
         """Open a new position"""
         self.position = True
@@ -143,43 +241,6 @@ class StandaloneClient:
         self.write_position(f"CLOSE {self.pair} at {price}, profit: {profit}")
         self.reset_position()
         
-    def get_candles(self):
-        """Get candlestick data from Binance"""
-        try:
-            # Get klines (candlestick data)
-            klines = self.client.get_klines(
-                symbol=self.pair,
-                interval=self.interval,
-                limit=self.df_length
-            )
-            
-            # Convert to DataFrame
-            df = pd.DataFrame(klines, columns=[
-                'timestamp', 'open', 'high', 'low', 'close', 'volume',
-                'close_time', 'quote_asset_volume', 'number_of_trades',
-                'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
-            ])
-            
-            # Convert types
-            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-            df['open'] = df['open'].astype(float)
-            df['high'] = df['high'].astype(float)
-            df['low'] = df['low'].astype(float)
-            df['close'] = df['close'].astype(float)
-            df['volume'] = df['volume'].astype(float)
-            
-            # Add indicators
-            df['sma_20'] = ta.trend.sma_indicator(df['close'], window=20)
-            df['sma_50'] = ta.trend.sma_indicator(df['close'], window=50)
-            df['rsi'] = ta.momentum.rsi(df['close'], window=14)
-            
-            self.df = df
-            return df
-            
-        except Exception as e:
-            print(f"Error getting candles: {str(e)}")
-            return None
-            
     def analyse_data(self):
         """Analyze market data for trading signals"""
         if self.df is None or len(self.df) < 50:
@@ -209,34 +270,6 @@ class StandaloneClient:
             
         return None
         
-    def trade_loop(self):
-        """Main trading loop"""
-        print("Starting trading loop...")
-        self.start()
-        
-        try:
-            while True:
-                signal = self.analyse_data()
-                
-                if signal == "buy" and not self.position:
-                    self.buy()
-                    if self.df is not None and len(self.df) > 0:
-                        price = self.df['close'].iloc[-1]
-                        self.open_position(time.time(), price)
-                        
-                elif signal == "sell" and self.position:
-                    self.sell()
-                    if self.df is not None and len(self.df) > 0:
-                        price = self.df['close'].iloc[-1]
-                        self.close_position(time.time(), price)
-                        
-                time.sleep(10)  # Check every 10 seconds
-                
-        except KeyboardInterrupt:
-            print("Trading loop stopped by user")
-        finally:
-            self.stop()
-            
     def backtest_loop(self):
         """Backtesting loop"""
         print("Starting backtesting...")

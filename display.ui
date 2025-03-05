@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1850</width>
-    <height>950</height>
+    <height>1050</height>
    </rect>
   </property>
   <property name="baseSize">
@@ -217,6 +217,411 @@
    <property name="alignment">
     <set>Qt::AlignCenter</set>
    </property>
+  </widget>
+  
+  <!-- Bot Control Panel -->
+  <widget class="QGroupBox" name="bot_controls_group">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>860</y>
+     <width>1800</width>
+     <height>170</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Trading Bot Controls</string>
+   </property>
+   
+   <!-- Platform selection -->
+   <widget class="QRadioButton" name="binance_radio">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Binance</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="mt5_radio">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>30</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>MetaTrader 5</string>
+    </property>
+   </widget>
+   
+   <!-- Trading parameters -->
+   <widget class="QLabel" name="pair_label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>60</y>
+      <width>80</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Trading Pair:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="trading_pair_field">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>80</y>
+      <width>100</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>BTCBUSD</string>
+    </property>
+   </widget>
+   
+   <widget class="QLabel" name="base_asset_label">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>60</y>
+      <width>80</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Base Asset:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="base_asset_field">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>80</y>
+      <width>100</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>BUSD</string>
+    </property>
+   </widget>
+   
+   <widget class="QLabel" name="trading_asset_label">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>60</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Trading Asset:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="trading_asset_field">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>80</y>
+      <width>100</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>BTC</string>
+    </property>
+   </widget>
+   
+   <!-- Take Profit and Stop Loss Settings -->
+   <widget class="QLabel" name="tp1_label">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>60</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Take Profit 1 (%):</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="tp1_field">
+    <property name="geometry">
+     <rect>
+      <x>350</x>
+      <y>80</y>
+      <width>60</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.02</string>
+    </property>
+   </widget>
+   
+   <widget class="QLabel" name="tp1_ratio_label">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>60</y>
+      <width>60</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Ratio:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="tp1_ratio_field">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>80</y>
+      <width>60</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.5</string>
+    </property>
+   </widget>
+   
+   <widget class="QLabel" name="tp2_label">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>60</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Take Profit 2 (%):</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="tp2_field">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>80</y>
+      <width>60</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.04</string>
+    </property>
+   </widget>
+   
+   <widget class="QLabel" name="tp2_ratio_label">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>60</y>
+      <width>60</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Ratio:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="tp2_ratio_field">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>80</y>
+      <width>60</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.5</string>
+    </property>
+   </widget>
+   
+   <widget class="QLabel" name="trail_stop_label">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>60</y>
+      <width>100</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Trail Stop (%):</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="trail_stop_field">
+    <property name="geometry">
+     <rect>
+      <x>630</x>
+      <y>80</y>
+      <width>60</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.85</string>
+    </property>
+   </widget>
+   
+   <widget class="QCheckBox" name="trail_stop_checkbox">
+    <property name="geometry">
+     <rect>
+      <x>700</x>
+      <y>80</y>
+      <width>100</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Enable</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   
+   <!-- Bot action buttons -->
+   <widget class="QPushButton" name="init_bot_button">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>120</y>
+      <width>120</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Initialize Bot</string>
+    </property>
+   </widget>
+   
+   <widget class="QPushButton" name="start_trading_button">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>120</y>
+      <width>120</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start Trading</string>
+    </property>
+   </widget>
+   
+   <widget class="QPushButton" name="stop_trading_button">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>120</y>
+      <width>120</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Stop Trading</string>
+    </property>
+   </widget>
+   
+   <!-- Status indicators -->
+   <widget class="QLabel" name="status_label">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>120</y>
+      <width>300</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string>Bot not initialized</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   
+   <widget class="QLabel" name="position_status_label">
+    <property name="geometry">
+     <rect>
+      <x>720</x>
+      <y>120</y>
+      <width>150</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string>Position: CLOSED</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   
+   <widget class="QLabel" name="base_balance_label">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>120</y>
+      <width>150</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string>0.00 BUSD</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   
+   <widget class="QLabel" name="asset_balance_label">
+    <property name="geometry">
+     <rect>
+      <x>1040</x>
+      <y>120</y>
+      <width>150</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string>0.00000000 BTC</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>

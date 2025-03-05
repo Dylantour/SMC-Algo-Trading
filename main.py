@@ -1,13 +1,43 @@
-
 import os, time
 from pathlib import Path
 import sys
 import math,datetime
 
-import MetaTrader5 as mt5
+# Try to import MetaTrader5 (Windows-only)
+try:
+    import MetaTrader5 as mt5
+    MT5_AVAILABLE = True
+except ImportError:
+    MT5_AVAILABLE = False
+    print("MetaTrader5 is not available. This is normal on non-Windows platforms.")
+    # Create a dummy mt5 module with the necessary constants for UI
+    class DummyMT5:
+        def __init__(self):
+            self.TIMEFRAME_M1 = "M1"
+            self.TIMEFRAME_M3 = "M3"
+            self.TIMEFRAME_M5 = "M5"
+            self.TIMEFRAME_M15 = "M15"
+            self.TIMEFRAME_H1 = "H1"
+            self.TIMEFRAME_H4 = "H4"
+            self.TIMEFRAME_D1 = "D1"
+            self.TIMEFRAME_W1 = "W1"
+            self.TIMEFRAME_MN1 = "MN1"
+        
+        def initialize(self):
+            print("Dummy MT5 initialized")
+            return True
+            
+        def copy_rates_from_pos(self, symbol, timeframe, start, count):
+            # Return dummy data
+            return [
+                [time.time(), 50000, 51000, 49000, 50500],  # timestamp, open, high, low, close
+                [time.time() + 60, 50500, 51500, 49500, 51000]
+            ]
+            
+    mt5 = DummyMT5()
 
 from PySide2.QtWidgets import QApplication, QWidget, QGraphicsView, QGraphicsItem, QGraphicsScene, QDesktopWidget, QGraphicsTextItem
-from PySide2.QtCore import QFile, QThread, QObject, Signal, Qt, QLineF, QPointF, QRect, QPoint
+from PySide2.QtCore import QFile, QThread, QObject, Signal, Qt, QLineF, QPointF, QRect, QPoint, QTimer
 from PySide2.QtGui import QBrush,QPen
 from PySide2.QtUiTools import QUiLoader
 
@@ -16,6 +46,22 @@ from PySide2.QtWebEngineWidgets import *
 from Candle import Candle
 
 from Vertex import Vertex
+
+# Import bot clients
+try:
+    from BinanceBot.BinanceClient import BinanceClient
+    from BinanceBot import key as binance_key
+    BINANCE_AVAILABLE = True
+except ImportError:
+    BINANCE_AVAILABLE = False
+    print("Binance client not available. Install python-binance to use Binance trading.")
+
+try:
+    from MT5Bot.MT5Client import MT5Client
+    MT5_AVAILABLE = True
+except ImportError:
+    MT5_AVAILABLE = False
+    print("MT5 client not available. Install MetaTrader5 to use MT5 trading.")
 
 
 
@@ -96,6 +142,20 @@ class Display(QWidget):
         self.ui.b_d1.clicked.connect(self.on_b_d1)
         self.ui.b_w1.clicked.connect(self.on_b_w1)
         self.ui.b_mn1.clicked.connect(self.on_b_mn1)
+
+        # Connect bot control buttons
+        self.ui.init_bot_button.clicked.connect(self.init_bot)
+        self.ui.start_trading_button.clicked.connect(self.start_trading)
+        self.ui.stop_trading_button.clicked.connect(self.stop_trading)
+        
+        # Initialize trading bot variables
+        self.trading_bot = None
+        self.trading_thread = None
+        
+        # Set up status update timer
+        self.status_timer = QTimer()
+        self.status_timer.timeout.connect(self.update_bot_status)
+        self.status_timer.start(1000)  # Update every second
 
         self.show()
         self.thread.start()
@@ -634,6 +694,196 @@ class Display(QWidget):
 
     def on_b_mn1(self):
         self.tf = mt5.TIMEFRAME_MN1
+
+    def init_bot(self):
+        """Initialize the trading bot with UI parameters"""
+        # Check which platform is selected
+        if self.ui.binance_radio.isChecked():
+            self.init_binance_bot()
+        else:
+            self.init_mt5_bot()
+    
+    def init_binance_bot(self):
+        """Initialize the Binance trading bot with UI parameters"""
+        if not BINANCE_AVAILABLE:
+            self.update_status("Error: Binance client not available")
+            return
+            
+        try:
+            # Create Binance client
+            self.trading_bot = BinanceClient(binance_key.key, binance_key.secret)
+            
+            # Set parameters from UI fields
+            self.trading_bot.base_asset = self.ui.base_asset_field.text()
+            self.trading_bot.asset = self.ui.trading_asset_field.text()
+            self.trading_bot.pair = self.ui.trading_pair_field.text()
+            self.trading_bot.interval = self.get_binance_interval()
+            
+            # Set TP/SL from UI
+            self.trading_bot.tp = [float(self.ui.tp1_field.text()), float(self.ui.tp2_field.text())]
+            self.trading_bot.tp_ratio = [float(self.ui.tp1_ratio_field.text()), float(self.ui.tp2_ratio_field.text())]
+            self.trading_bot.trail_stop = float(self.ui.trail_stop_field.text())
+            self.trading_bot.trail_stop_enabled = self.ui.trail_stop_checkbox.isChecked()
+            
+            # Initialize the bot
+            self.trading_bot.trade_init()
+            self.update_status("Binance bot initialized")
+        except Exception as e:
+            self.update_status(f"Error: {str(e)}")
+    
+    def init_mt5_bot(self):
+        """Initialize the MT5 trading bot with UI parameters"""
+        if not MT5_AVAILABLE:
+            self.update_status("Error: MT5 client not available")
+            return
+            
+        try:
+            # Create MT5 client
+            self.trading_bot = MT5Client()
+            
+            # Set parameters from UI fields
+            self.trading_bot.pair = self.ui.trading_pair_field.text()
+            self.trading_bot.interval = self.get_mt5_timeframe()
+            
+            # Set TP/SL from UI
+            self.trading_bot.tp = [float(self.ui.tp1_field.text()), float(self.ui.tp2_field.text())]
+            self.trading_bot.tp_ratio = [float(self.ui.tp1_ratio_field.text()), float(self.ui.tp2_ratio_field.text())]
+            self.trading_bot.trail_stop = float(self.ui.trail_stop_field.text())
+            self.trading_bot.trail_stop_enabled = self.ui.trail_stop_checkbox.isChecked()
+            
+            # Initialize the bot
+            self.trading_bot.trade_init()
+            self.update_status("MT5 bot initialized")
+        except Exception as e:
+            self.update_status(f"Error: {str(e)}")
+    
+    def start_trading(self):
+        """Start the trading loop in a separate thread"""
+        if not hasattr(self, 'trading_bot') or self.trading_bot is None:
+            self.update_status("Error: Bot not initialized")
+            return
+        
+        try:
+            # Create a trading thread
+            self.trading_thread = TradingThread(self.trading_bot)
+            
+            # Start the thread
+            self.trading_thread.start()
+            self.update_status("Trading started")
+        except Exception as e:
+            self.update_status(f"Error starting trading: {str(e)}")
+    
+    def stop_trading(self):
+        """Stop the trading loop"""
+        if hasattr(self, 'trading_thread') and self.trading_thread is not None and self.trading_thread.isRunning():
+            try:
+                self.trading_thread.stop()
+                self.trading_thread.wait()
+                self.update_status("Trading stopped")
+            except Exception as e:
+                self.update_status(f"Error stopping trading: {str(e)}")
+    
+    def update_status(self, message):
+        """Update the status label with the given message"""
+        self.ui.status_label.setText(message)
+    
+    def update_bot_status(self):
+        """Update UI with current bot status"""
+        if hasattr(self, 'trading_bot') and self.trading_bot is not None:
+            try:
+                # Update balance display
+                if hasattr(self.trading_bot, 'balances'):
+                    base_asset = self.trading_bot.base_asset if hasattr(self.trading_bot, 'base_asset') else "BUSD"
+                    asset = self.trading_bot.asset if hasattr(self.trading_bot, 'asset') else "BTC"
+                    
+                    base_balance = self.trading_bot.balances.get(base_asset, 0)
+                    asset_balance = self.trading_bot.balances.get(asset, 0)
+                    
+                    self.ui.base_balance_label.setText(f"{base_balance:.2f} {base_asset}")
+                    self.ui.asset_balance_label.setText(f"{asset_balance:.8f} {asset}")
+                
+                # Update position status
+                if hasattr(self.trading_bot, 'position_open'):
+                    if self.trading_bot.position_open:
+                        self.ui.position_status_label.setText("Position: OPEN")
+                        self.ui.position_status_label.setStyleSheet("color: green;")
+                    else:
+                        self.ui.position_status_label.setText("Position: CLOSED")
+                        self.ui.position_status_label.setStyleSheet("color: red;")
+            except Exception as e:
+                print(f"Error updating bot status: {str(e)}")
+    
+    def get_binance_interval(self):
+        """Convert UI timeframe selection to the format needed for Binance"""
+        # Map UI buttons to Binance intervals
+        interval_map = {
+            'b_m1': '1m',
+            'b_m3': '3m',
+            'b_m5': '5m',
+            'b_m15': '15m',
+            'b_h1': '1h',
+            'b_h4': '4h',
+            'b_d1': '1d',
+            'b_w1': '1w',
+            'b_mn1': '1M'
+        }
+        
+        # Find which button is checked
+        for button_name, interval in interval_map.items():
+            button = getattr(self.ui, button_name)
+            if button.isChecked():
+                return interval
+        
+        # Default to 1m
+        return '1m'
+    
+    def get_mt5_timeframe(self):
+        """Convert UI timeframe selection to MT5 timeframe constants"""
+        # Map UI buttons to MT5 timeframe constants
+        timeframe_map = {
+            'b_m1': mt5.TIMEFRAME_M1,
+            'b_m3': mt5.TIMEFRAME_M3,
+            'b_m5': mt5.TIMEFRAME_M5,
+            'b_m15': mt5.TIMEFRAME_M15,
+            'b_h1': mt5.TIMEFRAME_H1,
+            'b_h4': mt5.TIMEFRAME_H4,
+            'b_d1': mt5.TIMEFRAME_D1,
+            'b_w1': mt5.TIMEFRAME_W1,
+            'b_mn1': mt5.TIMEFRAME_MN1
+        }
+        
+        # Find which button is checked
+        for button_name, timeframe in timeframe_map.items():
+            button = getattr(self.ui, button_name)
+            if button.isChecked():
+                return timeframe
+        
+        # Default to 1m
+        return mt5.TIMEFRAME_M1
+
+# Add a trading thread class to handle the bot's trade_loop method
+class TradingThread(QThread):
+    def __init__(self, bot):
+        super(TradingThread, self).__init__()
+        self.bot = bot
+        self._stop = False
+    
+    def run(self):
+        """Run the trading loop"""
+        if hasattr(self.bot, 'trade_loop'):
+            # Override the while True loop in the original trade_loop
+            # to allow for stopping the thread
+            while not self._stop:
+                if hasattr(self.bot, 'mode') and self.bot.mode == "trade":
+                    time.sleep(self.bot.trading_delay if hasattr(self.bot, 'trading_delay') else 0.5)
+                    if hasattr(self.bot, 'data_process'):
+                        self.bot.data_process()
+                    if hasattr(self.bot, 'manager'):
+                        self.bot.manager()
+    
+    def stop(self):
+        """Signal the thread to stop"""
+        self._stop = True
 
 
 
