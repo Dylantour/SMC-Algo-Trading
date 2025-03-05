@@ -14,9 +14,14 @@ import logging
 import traceback
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, 
+logging.basicConfig(level=logging.DEBUG, 
                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Add a file handler to ensure logs are captured
+file_handler = logging.FileHandler('bot_control_debug.log')
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(file_handler)
 
 # Add the project root to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -24,6 +29,14 @@ project_root = current_dir
 sys.path.append(project_root)
 logger.info(f"Current directory: {current_dir}")
 logger.info(f"Python path: {sys.path}")
+
+# Initialize session state variables if they don't exist
+if 'bot_running' not in st.session_state:
+    st.session_state.bot_running = False
+if 'stop_event' not in st.session_state:
+    st.session_state.stop_event = threading.Event()
+if 'last_update' not in st.session_state:
+    st.session_state.last_update = None
 
 try:
     # Import the standalone client instead of the regular BinanceClient
@@ -39,76 +52,169 @@ try:
         logger.warning("Using default API key. Please update with your actual Binance API key.")
     
     # Initialize the client
-    client = BinanceClient(api_key, api_secret)
-    logger.info(f"BinanceClient initialized with base asset: {client.base_asset}, asset: {client.asset}, pair: {client.pair}")
-    
+    try:
+        logger.debug("Initializing BinanceClient with API keys")
+        client = BinanceClient(api_key, api_secret)
+        
+        # Test the client connection
+        logger.debug("Testing client connection with update() method")
+        client.update()
+        logger.info(f"BinanceClient initialized with base asset: {client.base_asset}, asset: {client.asset}, pair: {client.pair}")
+    except Exception as e:
+        logger.error(f"Error initializing BinanceClient: {str(e)}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        client = None
+        
 except Exception as e:
     logger.error(f"Error importing BinanceClient or initializing: {str(e)}")
-    logger.error(f"Traceback: {sys.exc_info()}")
+    logger.error(f"Traceback: {traceback.format_exc()}")
     client = None
 
-# Global variables
-bot_running = False
+# Global thread variable
 bot_thread = None
-stop_event = threading.Event()
 
 def start_bot():
-    global bot_running, bot_thread, stop_event
+    logger.debug("start_bot called, current bot_running status: %s", st.session_state.bot_running)
     
-    if bot_running:
+    if st.session_state.bot_running:
+        logger.warning("Bot is already running, not starting again")
         st.warning("Bot is already running!")
         return
     
     if client is None:
-        st.error("Binance client is not available. Check logs for details.")
+        error_msg = "Binance client is not available. Cannot start bot."
+        logger.error(error_msg)
+        st.session_state.error_message = error_msg
+        st.error(error_msg)
         return
     
-    stop_event.clear()
-    bot_thread = threading.Thread(target=bot_loop)
-    bot_thread.daemon = True
-    bot_thread.start()
-    bot_running = True
-    st.success("Bot started successfully!")
+    try:
+        logger.debug("Clearing stop event and creating bot thread")
+        st.session_state.stop_event.clear()
+        
+        global bot_thread
+        bot_thread = threading.Thread(target=bot_loop)
+        bot_thread.daemon = True
+        
+        logger.debug("Starting bot thread")
+        bot_thread.start()
+        
+        logger.debug("Setting bot_running to True")
+        st.session_state.bot_running = True
+        
+        # Clear any previous error messages
+        st.session_state.error_message = None
+        
+        logger.info("Bot started successfully")
+        st.success("Bot started successfully!")
+    except Exception as e:
+        error_msg = f"Error starting bot: {str(e)}"
+        logger.error(error_msg)
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        st.session_state.error_message = error_msg
+        st.error(error_msg)
 
 def stop_bot():
-    global bot_running, bot_thread, stop_event
+    logger.debug("stop_bot called, current bot_running status: %s", st.session_state.bot_running)
     
-    if not bot_running:
+    if not st.session_state.bot_running:
+        logger.warning("Bot is not running, nothing to stop")
         st.warning("Bot is not running!")
         return
     
-    stop_event.set()
-    if bot_thread:
-        bot_thread.join(timeout=2.0)
-    bot_running = False
-    st.success("Bot stopped successfully!")
+    try:
+        logger.debug("Setting stop event")
+        st.session_state.stop_event.set()
+        
+        global bot_thread
+        if bot_thread:
+            logger.debug("Joining bot thread with timeout")
+            bot_thread.join(timeout=2.0)
+            
+        logger.debug("Setting bot_running to False")
+        st.session_state.bot_running = False
+        
+        logger.info("Bot stopped successfully")
+        st.success("Bot stopped successfully!")
+    except Exception as e:
+        logger.error(f"Error stopping bot: {str(e)}")
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        st.error(f"Error stopping bot: {str(e)}")
 
 def bot_loop():
-    logger.info("Bot loop started")
+    logger.debug("Bot loop started")
     try:
         # Initialize the trading bot
-        client.trade_init()
-        logger.info("Trade initialized")
+        logger.debug("Calling client.trade_init()")
+        try:
+            client.trade_init()
+            logger.info("Trade initialized successfully")
+        except Exception as e:
+            error_msg = f"Error initializing trading: {str(e)}"
+            logger.error(f"Error in client.trade_init(): {str(e)}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            st.session_state.error_message = error_msg
+            st.error(error_msg)
+            # Set bot_running to False since initialization failed
+            st.session_state.bot_running = False
+            return
         
         # Main trading loop
-        while not stop_event.is_set():
-            # Process data and make trading decisions
-            client.data_process()
-            client.manager()
-            
-            # Update status in session state
-            if 'last_update' not in st.session_state:
+        while not st.session_state.stop_event.is_set():
+            try:
+                logger.debug("Processing data and managing trades")
+                
+                # Check if client is still available
+                if client is None:
+                    error_msg = "Client is None in bot loop"
+                    logger.error(error_msg)
+                    st.session_state.error_message = error_msg
+                    break
+                
+                # Process data and make trading decisions
+                try:
+                    logger.debug("Calling client.data_process()")
+                    client.data_process()
+                except Exception as e:
+                    error_msg = f"Error processing data: {str(e)}"
+                    logger.error(f"Error in client.data_process(): {str(e)}")
+                    logger.error(f"Traceback: {traceback.format_exc()}")
+                    st.session_state.error_message = error_msg
+                    time.sleep(5.0)
+                    continue
+                
+                try:
+                    logger.debug("Calling client.manager()")
+                    client.manager()
+                except Exception as e:
+                    error_msg = f"Error managing trades: {str(e)}"
+                    logger.error(f"Error in client.manager(): {str(e)}")
+                    logger.error(f"Traceback: {traceback.format_exc()}")
+                    st.session_state.error_message = error_msg
+                    time.sleep(5.0)
+                    continue
+                
+                # Update status in session state
                 st.session_state.last_update = time.time()
-            st.session_state.last_update = time.time()
-            
-            # Sleep to avoid excessive CPU usage
-            time.sleep(1.0)
+                
+                # Sleep to avoid excessive CPU usage
+                time.sleep(1.0)
+            except Exception as e:
+                error_msg = f"Error in bot loop iteration: {str(e)}"
+                logger.error(error_msg)
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                st.session_state.error_message = error_msg
+                time.sleep(5.0)  # Wait a bit longer after an error
             
     except Exception as e:
-        logger.error(f"Error in bot loop: {str(e)}")
-        logger.error(f"Traceback: {sys.exc_info()}")
+        error_msg = f"Error in bot loop: {str(e)}"
+        logger.error(error_msg)
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        st.session_state.error_message = error_msg
     finally:
         logger.info("Bot loop ended")
+        # Make sure to set bot_running to False when the loop ends
+        st.session_state.bot_running = False
 
 def main():
     st.title("Binance Trading Bot Control")
@@ -116,18 +222,41 @@ def main():
     # Check if client is available
     if client is None:
         st.error("Binance client is not available. Check logs for details.")
+        
+        # Display possible solutions
+        st.warning("""
+        Possible solutions:
+        1. Make sure you have set valid Binance API keys in BinanceBot/key.py or as environment variables
+        2. Check your internet connection
+        3. Verify that the Binance API is accessible from your location
+        4. Check the log file (bot_control_debug.log) for detailed error messages
+        """)
+        
+        # Add a button to retry initialization
+        if st.button("Retry Connection"):
+            st.experimental_rerun()
+            
         st.stop()
+    
+    # Add error display section
+    if 'error_message' not in st.session_state:
+        st.session_state.error_message = None
+        
+    if st.session_state.error_message:
+        st.error(f"Bot Error: {st.session_state.error_message}")
+        if st.button("Clear Error"):
+            st.session_state.error_message = None
     
     # Display bot status
     st.header("Bot Status")
     status_col1, status_col2 = st.columns(2)
     
     with status_col1:
-        status = "Running" if bot_running else "Stopped"
+        status = "Running" if st.session_state.bot_running else "Stopped"
         st.metric("Status", status)
     
     with status_col2:
-        if 'last_update' in st.session_state:
+        if st.session_state.last_update:
             last_update = time.strftime('%H:%M:%S', time.localtime(st.session_state.last_update))
         else:
             last_update = "Never"
@@ -135,14 +264,21 @@ def main():
     
     # Bot controls
     st.header("Bot Controls")
+    logger.debug("Rendering bot controls section")
     col1, col2 = st.columns(2)
     
     with col1:
-        if st.button("Start Bot", type="primary", disabled=bot_running):
+        logger.debug("Rendering Start Bot button (disabled=%s)", st.session_state.bot_running)
+        start_button = st.button("Start Bot", type="primary", disabled=st.session_state.bot_running)
+        if start_button:
+            logger.debug("Start Bot button clicked")
             start_bot()
     
     with col2:
-        if st.button("Stop Bot", type="secondary", disabled=not bot_running):
+        logger.debug("Rendering Stop Bot button (disabled=%s)", not st.session_state.bot_running)
+        stop_button = st.button("Stop Bot", type="secondary", disabled=not st.session_state.bot_running)
+        if stop_button:
+            logger.debug("Stop Bot button clicked")
             stop_bot()
     
     # Trading pair settings
@@ -174,7 +310,7 @@ def main():
         submitted = st.form_submit_button("Update Settings")
         
         if submitted:
-            if bot_running:
+            if st.session_state.bot_running:
                 st.warning("Cannot update settings while bot is running. Please stop the bot first.")
             else:
                 client.base_asset = new_base_asset

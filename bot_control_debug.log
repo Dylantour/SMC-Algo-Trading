@@ -1,0 +1,123 @@
+2025-03-05 23:59:05,514 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-05 23:59:05,514 - __main__ - INFO - Python path: ['streamlit_bot_control.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-05 23:59:06,161 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-05 23:59:06,162 - __main__ - INFO - Successfully imported API keys
+2025-03-05 23:59:06,162 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-05 23:59:06,162 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-05 23:59:06,859 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-05 23:59:07,745 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-05 23:59:07,791 - __main__ - DEBUG - Rendering bot controls section
+2025-03-05 23:59:07,791 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-05 23:59:07,791 - __main__ - DEBUG - Rendering Stop Bot button (disabled=True)
+2025-03-05 23:59:10,358 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-05 23:59:10,358 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-05 23:59:10,358 - __main__ - INFO - Python path: ['streamlit_bot_control.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-05 23:59:10,358 - __main__ - INFO - Python path: ['streamlit_bot_control.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-05 23:59:10,358 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-05 23:59:10,358 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-05 23:59:10,358 - __main__ - INFO - Successfully imported API keys
+2025-03-05 23:59:10,358 - __main__ - INFO - Successfully imported API keys
+2025-03-05 23:59:10,358 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-05 23:59:10,358 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-05 23:59:10,359 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-05 23:59:10,359 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-05 23:59:10,694 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-05 23:59:10,694 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-05 23:59:11,572 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-05 23:59:11,572 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-05 23:59:11,574 - __main__ - DEBUG - Rendering bot controls section
+2025-03-05 23:59:11,574 - __main__ - DEBUG - Rendering bot controls section
+2025-03-05 23:59:11,575 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-05 23:59:11,575 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-05 23:59:11,577 - __main__ - DEBUG - Start Bot button clicked
+2025-03-05 23:59:11,577 - __main__ - DEBUG - Start Bot button clicked
+2025-03-05 23:59:11,578 - __main__ - DEBUG - start_bot called, current bot_running status: False
+2025-03-05 23:59:11,578 - __main__ - DEBUG - start_bot called, current bot_running status: False
+2025-03-05 23:59:11,578 - __main__ - DEBUG - Clearing stop event and creating bot thread
+2025-03-05 23:59:11,578 - __main__ - DEBUG - Clearing stop event and creating bot thread
+2025-03-05 23:59:11,578 - __main__ - DEBUG - Starting bot thread
+2025-03-05 23:59:11,578 - __main__ - DEBUG - Starting bot thread
+2025-03-05 23:59:11,580 - __main__ - DEBUG - Bot loop started
+2025-03-05 23:59:11,580 - __main__ - DEBUG - Bot loop started
+2025-03-05 23:59:11,581 - __main__ - DEBUG - Setting bot_running to True
+2025-03-05 23:59:11,581 - __main__ - DEBUG - Calling client.trade_init()
+2025-03-05 23:59:11,581 - __main__ - DEBUG - Setting bot_running to True
+2025-03-05 23:59:11,581 - __main__ - DEBUG - Calling client.trade_init()
+2025-03-05 23:59:11,582 - __main__ - INFO - Bot started successfully
+2025-03-05 23:59:11,582 - __main__ - INFO - Bot started successfully
+2025-03-05 23:59:11,583 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-05 23:59:11,583 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-05 23:59:13,504 - __main__ - INFO - Trade initialized successfully
+2025-03-05 23:59:13,504 - __main__ - INFO - Trade initialized successfully
+2025-03-05 23:59:13,504 - __main__ - ERROR - Error in bot loop: st.session_state has no attribute "stop_event". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+2025-03-05 23:59:13,504 - __main__ - ERROR - Error in bot loop: st.session_state has no attribute "stop_event". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+2025-03-05 23:59:13,509 - __main__ - ERROR - Traceback: Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 452, in __getitem__
+    return self._getitem(widget_id, key)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 497, in _getitem
+    raise KeyError
+KeyError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 130, in __getattr__
+    return self[key]
+           ~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 101, in __getitem__
+    return get_session_state()[key]
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/safe_session_state.py", line 96, in __getitem__
+    return self._state[key]
+           ~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 454, in __getitem__
+    raise KeyError(_missing_key_error_message(key))
+KeyError: 'st.session_state has no key "stop_event". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/streamlit_bot_control.py", line 163, in bot_loop
+    while not st.session_state.stop_event.is_set():
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 132, in __getattr__
+    raise AttributeError(_missing_attr_error_message(key))
+AttributeError: st.session_state has no attribute "stop_event". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+
+2025-03-05 23:59:13,509 - __main__ - ERROR - Traceback: Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 452, in __getitem__
+    return self._getitem(widget_id, key)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 497, in _getitem
+    raise KeyError
+KeyError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 130, in __getattr__
+    return self[key]
+           ~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 101, in __getitem__
+    return get_session_state()[key]
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/safe_session_state.py", line 96, in __getitem__
+    return self._state[key]
+           ~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 454, in __getitem__
+    raise KeyError(_missing_key_error_message(key))
+KeyError: 'st.session_state has no key "stop_event". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/streamlit_bot_control.py", line 163, in bot_loop
+    while not st.session_state.stop_event.is_set():
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 132, in __getattr__
+    raise AttributeError(_missing_attr_error_message(key))
+AttributeError: st.session_state has no attribute "stop_event". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+
+2025-03-05 23:59:13,510 - __main__ - INFO - Bot loop ended
+2025-03-05 23:59:13,510 - __main__ - INFO - Bot loop ended
