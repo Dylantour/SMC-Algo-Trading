@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """
-Streamlit Bot Control UI
-This script provides a web-based UI for controlling the trading bots.
+API Activity Dashboard
+This is a simplified version of the Streamlit application that focuses just on the API activity visualization.
 """
 
 import streamlit as st
-import time
-import threading
+import logging
 import os
 import sys
-from pathlib import Path
-import logging
+import time
+import threading
 import traceback
-import datetime
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG, 
@@ -20,7 +18,7 @@ logging.basicConfig(level=logging.DEBUG,
 logger = logging.getLogger(__name__)
 
 # Add a file handler to ensure logs are captured
-file_handler = logging.FileHandler('bot_control_debug.log')
+file_handler = logging.FileHandler('api_dashboard.log')
 file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 logger.addHandler(file_handler)
 
@@ -39,14 +37,10 @@ try:
 except Exception as e:
     logger.error(f"Error importing API logger: {str(e)}")
     logger.error(f"Traceback: {traceback.format_exc()}")
+    st.error(f"Error importing API logger: {str(e)}")
+    st.stop()
 
 # Initialize session state variables if they don't exist
-if 'bot_running' not in st.session_state:
-    st.session_state.bot_running = False
-if 'stop_event' not in st.session_state:
-    st.session_state.stop_event = threading.Event()
-if 'last_update' not in st.session_state:
-    st.session_state.last_update = None
 if 'api_log_handler' not in st.session_state:
     try:
         st.session_state.api_log_handler = setup_api_logger()
@@ -78,11 +72,13 @@ try:
         import threading
         import time
         
+        # Define these variables at module level
         client_initialized = False
         client_error = None
         
         def init_client():
-            nonlocal client_initialized, client_error
+            # Use global instead of nonlocal since these variables are at module level
+            global client_initialized, client_error
             try:
                 logger.debug("Testing client connection with update() method")
                 client.update()
@@ -98,7 +94,7 @@ try:
         init_thread.start()
         
         # Wait for initialization with timeout
-        timeout = 10  # 10 seconds timeout
+        timeout = 5  # 5 seconds timeout
         start_time = time.time()
         while not client_initialized and time.time() - start_time < timeout:
             time.sleep(0.1)
@@ -123,34 +119,10 @@ except Exception as e:
 # Global thread variable
 bot_thread = None
 
-# Helper functions for visualization
-def _format_time(timestamp):
-    """Format a timestamp for display"""
-    if timestamp is None:
-        return "N/A"
-    if isinstance(timestamp, datetime.datetime):
-        return timestamp.strftime('%H:%M:%S')
-    return str(timestamp)
-
-def _format_duration(start_time):
-    """Format a duration from start_time to now"""
-    if start_time is None:
-        return "N/A"
-    if isinstance(start_time, datetime.datetime):
-        duration = datetime.datetime.now() - start_time
-        seconds = duration.total_seconds()
-        if seconds < 60:
-            return f"{int(seconds)}s"
-        elif seconds < 3600:
-            return f"{int(seconds/60)}m {int(seconds%60)}s"
-        else:
-            return f"{int(seconds/3600)}h {int((seconds%3600)/60)}m"
-    return "Unknown"
-
 def start_bot():
-    logger.debug("start_bot called, current bot_running status: %s", st.session_state.bot_running)
+    logger.debug("start_bot called")
     
-    if st.session_state.bot_running:
+    if 'bot_running' in st.session_state and st.session_state.bot_running:
         logger.warning("Bot is already running, not starting again")
         st.warning("Bot is already running!")
         return
@@ -158,13 +130,11 @@ def start_bot():
     if client is None:
         error_msg = "Binance client is not available. Cannot start bot."
         logger.error(error_msg)
-        st.session_state.error_message = error_msg
         st.error(error_msg)
         return
     
     try:
-        logger.debug("Clearing stop event and creating bot thread")
-        st.session_state.stop_event.clear()
+        logger.debug("Creating bot thread")
         
         global bot_thread
         bot_thread = threading.Thread(target=bot_loop)
@@ -176,29 +146,25 @@ def start_bot():
         logger.debug("Setting bot_running to True")
         st.session_state.bot_running = True
         
-        # Clear any previous error messages
-        st.session_state.error_message = None
-        
         logger.info("Bot started successfully")
         st.success("Bot started successfully!")
     except Exception as e:
         error_msg = f"Error starting bot: {str(e)}"
         logger.error(error_msg)
         logger.error(f"Traceback: {traceback.format_exc()}")
-        st.session_state.error_message = error_msg
         st.error(error_msg)
 
 def stop_bot():
-    logger.debug("stop_bot called, current bot_running status: %s", st.session_state.bot_running)
+    logger.debug("stop_bot called")
     
-    if not st.session_state.bot_running:
+    if 'bot_running' not in st.session_state or not st.session_state.bot_running:
         logger.warning("Bot is not running, nothing to stop")
         st.warning("Bot is not running!")
         return
     
     try:
-        logger.debug("Setting stop event")
-        st.session_state.stop_event.set()
+        logger.debug("Setting stop_bot flag")
+        st.session_state.stop_bot = True
         
         global bot_thread
         if bot_thread:
@@ -227,14 +193,14 @@ def bot_loop():
             error_msg = f"Error initializing trading: {str(e)}"
             logger.error(f"Error in client.trade_init(): {str(e)}")
             logger.error(f"Traceback: {traceback.format_exc()}")
-            st.session_state.error_message = error_msg
             st.error(error_msg)
             # Set bot_running to False since initialization failed
             st.session_state.bot_running = False
             return
         
         # Main trading loop
-        while not st.session_state.stop_event.is_set():
+        st.session_state.stop_bot = False
+        while not st.session_state.stop_bot:
             try:
                 logger.debug("Processing data and managing trades")
                 
@@ -242,7 +208,6 @@ def bot_loop():
                 if client is None:
                     error_msg = "Client is None in bot loop"
                     logger.error(error_msg)
-                    st.session_state.error_message = error_msg
                     break
                 
                 # Process data and make trading decisions
@@ -253,7 +218,6 @@ def bot_loop():
                     error_msg = f"Error processing data: {str(e)}"
                     logger.error(f"Error in client.data_process(): {str(e)}")
                     logger.error(f"Traceback: {traceback.format_exc()}")
-                    st.session_state.error_message = error_msg
                     time.sleep(5.0)
                     continue
                 
@@ -264,7 +228,6 @@ def bot_loop():
                     error_msg = f"Error managing trades: {str(e)}"
                     logger.error(f"Error in client.manager(): {str(e)}")
                     logger.error(f"Traceback: {traceback.format_exc()}")
-                    st.session_state.error_message = error_msg
                     time.sleep(5.0)
                     continue
                 
@@ -277,21 +240,19 @@ def bot_loop():
                 error_msg = f"Error in bot loop iteration: {str(e)}"
                 logger.error(error_msg)
                 logger.error(f"Traceback: {traceback.format_exc()}")
-                st.session_state.error_message = error_msg
                 time.sleep(5.0)  # Wait a bit longer after an error
             
     except Exception as e:
         error_msg = f"Error in bot loop: {str(e)}"
         logger.error(error_msg)
         logger.error(f"Traceback: {traceback.format_exc()}")
-        st.session_state.error_message = error_msg
     finally:
         logger.info("Bot loop ended")
         # Make sure to set bot_running to False when the loop ends
         st.session_state.bot_running = False
 
 def main():
-    st.title("Binance Trading Bot Control")
+    st.title("Binance API Activity Dashboard")
     
     # Check if client is available
     if client is None:
@@ -303,7 +264,7 @@ def main():
         1. Make sure you have set valid Binance API keys in BinanceBot/key.py or as environment variables
         2. Check your internet connection
         3. Verify that the Binance API is accessible from your location
-        4. Check the log file (bot_control_debug.log) for detailed error messages
+        4. Check the log file (api_dashboard.log) for detailed error messages
         """)
         
         # Add a button to retry initialization
@@ -312,142 +273,60 @@ def main():
             
         st.stop()
     
-    # Add error display section
-    if 'error_message' not in st.session_state:
-        st.session_state.error_message = None
-        
-    if st.session_state.error_message:
-        st.error(f"Bot Error: {st.session_state.error_message}")
-        if st.button("Clear Error"):
-            st.session_state.error_message = None
+    # Bot controls
+    st.header("Bot Controls")
+    logger.debug("Rendering bot controls section")
+    col1, col2 = st.columns(2)
     
-    # Create tabs for different sections
-    tab1, tab2, tab3, tab4 = st.tabs(["Dashboard", "Settings", "API Activity", "Account"])
+    with col1:
+        start_disabled = st.session_state.get('bot_running', False)
+        logger.debug(f"Rendering Start Bot button (disabled={start_disabled})")
+        start_button = st.button("Start Bot", type="primary", disabled=start_disabled)
+        if start_button:
+            logger.debug("Start Bot button clicked")
+            start_bot()
     
-    with tab1:
-        # Display bot status
-        st.header("Bot Status")
-        status_col1, status_col2 = st.columns(2)
-        
-        with status_col1:
-            status = "Running" if st.session_state.bot_running else "Stopped"
-            st.metric("Status", status)
-        
-        with status_col2:
-            if st.session_state.last_update:
-                last_update = time.strftime('%H:%M:%S', time.localtime(st.session_state.last_update))
-            else:
-                last_update = "Never"
-            st.metric("Last Update", last_update)
-        
-        # Bot controls
-        st.header("Bot Controls")
-        logger.debug("Rendering bot controls section")
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            logger.debug("Rendering Start Bot button (disabled=%s)", st.session_state.bot_running)
-            start_button = st.button("Start Bot", type="primary", disabled=st.session_state.bot_running)
-            if start_button:
-                logger.debug("Start Bot button clicked")
-                start_bot()
-        
-        with col2:
-            logger.debug("Rendering Stop Bot button (disabled=%s)", not st.session_state.bot_running)
-            stop_button = st.button("Stop Bot", type="secondary", disabled=not st.session_state.bot_running)
-            if stop_button:
-                logger.debug("Stop Bot button clicked")
-                stop_bot()
-        
-        # Display market data if available
-        if hasattr(client, 'df') and client.df is not None and not client.df.empty:
-            st.header("Market Data")
-            st.dataframe(client.df.tail())
+    with col2:
+        stop_disabled = not st.session_state.get('bot_running', False)
+        logger.debug(f"Rendering Stop Bot button (disabled={stop_disabled})")
+        stop_button = st.button("Stop Bot", type="secondary", disabled=stop_disabled)
+        if stop_button:
+            logger.debug("Stop Bot button clicked")
+            stop_bot()
     
-    with tab2:
-        # Trading pair settings
-        st.header("Trading Settings")
-        
-        # Display current settings
-        st.subheader("Current Settings")
-        settings_col1, settings_col2 = st.columns(2)
-        
-        with settings_col1:
-            st.metric("Base Asset", client.base_asset)
-            st.metric("Trading Pair", client.pair)
-        
-        with settings_col2:
-            st.metric("Asset", client.asset)
-            st.metric("Interval", client.interval)
-        
-        # Update settings form
-        with st.form("settings_form"):
-            st.subheader("Update Settings")
-            
-            new_base_asset = st.text_input("Base Asset", value=client.base_asset)
-            new_asset = st.text_input("Asset", value=client.asset)
-            new_pair = st.text_input("Trading Pair", value=client.pair)
-            new_interval = st.selectbox("Interval", 
-                                       options=["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d"],
-                                       index=["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "6h", "8h", "12h", "1d"].index(client.interval))
-            
-            submitted = st.form_submit_button("Update Settings")
-            
-            if submitted:
-                if st.session_state.bot_running:
-                    st.warning("Cannot update settings while bot is running. Please stop the bot first.")
-                else:
-                    client.base_asset = new_base_asset
-                    client.asset = new_asset
-                    client.pair = new_pair
-                    client.interval = new_interval
-                    st.success("Settings updated successfully!")
+    # Display bot status
+    st.header("Bot Status")
+    status_col1, status_col2 = st.columns(2)
     
-    with tab3:
-        # API Activity visualization
-        if 'api_log_handler' in st.session_state and st.session_state.api_log_handler:
-            render_api_activity_dashboard(st.session_state.api_log_handler)
+    with status_col1:
+        status = "Running" if st.session_state.get('bot_running', False) else "Stopped"
+        st.metric("Status", status)
+    
+    with status_col2:
+        if 'last_update' in st.session_state and st.session_state.last_update:
+            last_update = time.strftime('%H:%M:%S', time.localtime(st.session_state.last_update))
         else:
-            st.warning("API logger is not available. Cannot display API activity.")
-            
-            # Add a button to initialize the API logger
-            if st.button("Initialize API Logger"):
-                try:
-                    st.session_state.api_log_handler = setup_api_logger()
-                    st.success("API logger initialized successfully!")
-                    st.experimental_rerun()
-                except Exception as e:
-                    st.error(f"Error initializing API logger: {str(e)}")
+            last_update = "Never"
+        st.metric("Last Update", last_update)
     
-    with tab4:
-        # Account information
-        st.header("Account Information")
+    # API Activity visualization
+    if 'api_log_handler' in st.session_state and st.session_state.api_log_handler:
+        render_api_activity_dashboard(st.session_state.api_log_handler)
+    else:
+        st.warning("API logger is not available. Cannot display API activity.")
         
-        if st.button("Refresh Account Info"):
+        # Add a button to initialize the API logger
+        if st.button("Initialize API Logger"):
             try:
-                client.update()
-                st.success("Account information refreshed!")
+                st.session_state.api_log_handler = setup_api_logger()
+                st.success("API logger initialized successfully!")
+                st.experimental_rerun()
             except Exception as e:
-                st.error(f"Error refreshing account information: {str(e)}")
-        
-        # Display balances
-        st.subheader("Balances")
-        
-        if hasattr(client, 'balances') and client.balances:
-            balance_data = []
-            for asset, amount in client.balances.items():
-                balance_data.append({"Asset": asset, "Amount": amount})
-            
-            if balance_data:
-                st.table(balance_data)
-            else:
-                st.info("No balance information available.")
-        else:
-            st.info("No balance information available. Click 'Refresh Account Info' to update.")
+                st.error(f"Error initializing API logger: {str(e)}")
     
     # Add a footer
     st.markdown("---")
-    st.caption("Binance Trading Bot Control Panel | Refresh every 10 seconds")
+    st.caption("Binance API Activity Dashboard | Refresh every 10 seconds")
 
 if __name__ == "__main__":
     main() 

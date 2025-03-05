@@ -1,0 +1,40 @@
+2025-03-06 00:47:56,278 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:47:56,279 - __main__ - INFO - Python path: ['api_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:47:56,528 - __main__ - INFO - Successfully imported API logger and visualization components
+2025-03-06 00:47:56,528 - __main__ - INFO - API logger initialized successfully
+2025-03-06 00:47:56,886 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:47:56,886 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:47:56,886 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:47:56,886 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:54:54,264 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:54:54,265 - __main__ - INFO - Python path: ['api_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:54:54,530 - __main__ - INFO - Successfully imported API logger and visualization components
+2025-03-06 00:54:54,530 - __main__ - INFO - API logger initialized successfully
+2025-03-06 00:54:54,904 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:54:54,905 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:54:54,905 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:54:54,905 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:56:31,013 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:56:31,013 - __main__ - INFO - Python path: ['api_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:56:31,192 - __main__ - INFO - Successfully imported API logger and visualization components
+2025-03-06 00:56:31,192 - __main__ - INFO - API logger initialized successfully
+2025-03-06 00:56:31,502 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:56:31,502 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:56:31,502 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:56:31,502 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:57:12,259 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:57:12,259 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:57:12,259 - __main__ - INFO - Python path: ['api_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:57:12,259 - __main__ - INFO - Python path: ['api_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:57:12,259 - __main__ - INFO - Successfully imported API logger and visualization components
+2025-03-06 00:57:12,259 - __main__ - INFO - Successfully imported API logger and visualization components
+2025-03-06 00:57:12,260 - __main__ - INFO - API logger initialized successfully
+2025-03-06 00:57:12,260 - __main__ - INFO - API logger initialized successfully
+2025-03-06 00:57:12,260 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:57:12,260 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:57:12,260 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:57:12,260 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:57:12,260 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:57:12,260 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:57:12,260 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:57:12,260 - __main__ - DEBUG - Initializing BinanceClient with API keys

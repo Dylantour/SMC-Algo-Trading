@@ -1,0 +1,453 @@
+2025-03-06 00:58:44,496 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:58:44,496 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:58:44,809 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:58:44,810 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:58:44,810 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:58:44,810 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:58:45,435 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:58:46,322 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:58:46,456 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:58:46,456 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-06 00:58:46,457 - __main__ - DEBUG - Rendering Stop Bot button (disabled=True)
+2025-03-06 00:58:51,475 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:58:51,475 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:58:51,476 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:58:51,476 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:58:51,477 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:58:51,477 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:58:51,477 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:58:51,477 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:58:51,477 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:58:51,477 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:58:51,477 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:58:51,477 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:58:51,899 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:58:51,899 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:58:53,028 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:58:53,028 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:58:53,048 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:58:53,048 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:58:53,050 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-06 00:58:53,050 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-06 00:58:53,051 - __main__ - DEBUG - Rendering Stop Bot button (disabled=True)
+2025-03-06 00:58:53,051 - __main__ - DEBUG - Rendering Stop Bot button (disabled=True)
+2025-03-06 00:59:08,507 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:08,507 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:08,507 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:08,507 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:08,507 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:08,507 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:08,508 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:08,508 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:08,508 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:08,508 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:08,508 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:08,508 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:08,508 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:08,508 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:08,508 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:08,508 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:08,508 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:08,508 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:08,811 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:08,811 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:08,811 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:09,662 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:09,662 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:09,662 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:09,740 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:09,740 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:09,740 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:09,742 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-06 00:59:09,742 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-06 00:59:09,742 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-06 00:59:09,743 - __main__ - DEBUG - Rendering Stop Bot button (disabled=True)
+2025-03-06 00:59:09,743 - __main__ - DEBUG - Rendering Stop Bot button (disabled=True)
+2025-03-06 00:59:09,743 - __main__ - DEBUG - Rendering Stop Bot button (disabled=True)
+2025-03-06 00:59:13,730 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:13,730 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:13,730 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:13,730 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:13,731 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:13,731 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:13,731 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:13,731 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:13,731 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:13,731 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:13,731 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:13,731 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:13,731 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:13,731 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:13,731 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:13,731 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:13,731 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:13,731 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:13,731 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:13,731 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:13,731 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:13,731 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:13,731 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:13,731 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:14,093 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:14,093 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:14,093 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:14,093 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:15,016 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:15,016 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:15,016 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:15,016 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:15,031 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:15,031 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:15,031 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:15,031 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:15,037 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-06 00:59:15,037 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-06 00:59:15,037 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-06 00:59:15,037 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-06 00:59:15,046 - __main__ - DEBUG - Start Bot button clicked
+2025-03-06 00:59:15,046 - __main__ - DEBUG - Start Bot button clicked
+2025-03-06 00:59:15,046 - __main__ - DEBUG - Start Bot button clicked
+2025-03-06 00:59:15,046 - __main__ - DEBUG - Start Bot button clicked
+2025-03-06 00:59:15,047 - __main__ - DEBUG - start_bot called
+2025-03-06 00:59:15,047 - __main__ - DEBUG - start_bot called
+2025-03-06 00:59:15,047 - __main__ - DEBUG - start_bot called
+2025-03-06 00:59:15,047 - __main__ - DEBUG - start_bot called
+2025-03-06 00:59:15,047 - __main__ - DEBUG - Creating bot thread
+2025-03-06 00:59:15,047 - __main__ - DEBUG - Creating bot thread
+2025-03-06 00:59:15,047 - __main__ - DEBUG - Creating bot thread
+2025-03-06 00:59:15,047 - __main__ - DEBUG - Creating bot thread
+2025-03-06 00:59:15,047 - __main__ - DEBUG - Starting bot thread
+2025-03-06 00:59:15,047 - __main__ - DEBUG - Starting bot thread
+2025-03-06 00:59:15,047 - __main__ - DEBUG - Starting bot thread
+2025-03-06 00:59:15,047 - __main__ - DEBUG - Starting bot thread
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Bot loop started
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Bot loop started
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Bot loop started
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Setting bot_running to True
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Bot loop started
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Setting bot_running to True
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Calling client.trade_init()
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Setting bot_running to True
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Calling client.trade_init()
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Setting bot_running to True
+2025-03-06 00:59:15,049 - __main__ - INFO - Bot started successfully
+2025-03-06 00:59:15,049 - __main__ - INFO - Bot started successfully
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Calling client.trade_init()
+2025-03-06 00:59:15,048 - __main__ - DEBUG - Calling client.trade_init()
+2025-03-06 00:59:15,049 - __main__ - INFO - Bot started successfully
+2025-03-06 00:59:15,049 - __main__ - INFO - Bot started successfully
+2025-03-06 00:59:15,049 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:15,049 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:15,049 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:15,049 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:16,475 - __main__ - INFO - Trade initialized successfully
+2025-03-06 00:59:16,475 - __main__ - INFO - Trade initialized successfully
+2025-03-06 00:59:16,475 - __main__ - INFO - Trade initialized successfully
+2025-03-06 00:59:16,475 - __main__ - INFO - Trade initialized successfully
+2025-03-06 00:59:16,476 - __main__ - ERROR - Error in client.trade_init(): st.session_state has no attribute "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+2025-03-06 00:59:16,476 - __main__ - ERROR - Error in client.trade_init(): st.session_state has no attribute "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+2025-03-06 00:59:16,476 - __main__ - ERROR - Error in client.trade_init(): st.session_state has no attribute "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+2025-03-06 00:59:16,476 - __main__ - ERROR - Error in client.trade_init(): st.session_state has no attribute "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+2025-03-06 00:59:16,481 - __main__ - ERROR - Traceback: Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 452, in __getitem__
+    return self._getitem(widget_id, key)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 497, in _getitem
+    raise KeyError
+KeyError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 130, in __getattr__
+    return self[key]
+           ~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 101, in __getitem__
+    return get_session_state()[key]
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/safe_session_state.py", line 96, in __getitem__
+    return self._state[key]
+           ~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 454, in __getitem__
+    raise KeyError(_missing_key_error_message(key))
+KeyError: 'st.session_state has no key "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/minimal_dashboard.py", line 194, in bot_loop
+    log_api_call("/api/v3/trade_init", "success", 0.5)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/minimal_dashboard.py", line 113, in log_api_call
+    st.session_state.api_logs.append({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 132, in __getattr__
+    raise AttributeError(_missing_attr_error_message(key))
+AttributeError: st.session_state has no attribute "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+
+2025-03-06 00:59:16,481 - __main__ - ERROR - Traceback: Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 452, in __getitem__
+    return self._getitem(widget_id, key)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 497, in _getitem
+    raise KeyError
+KeyError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 130, in __getattr__
+    return self[key]
+           ~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 101, in __getitem__
+    return get_session_state()[key]
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/safe_session_state.py", line 96, in __getitem__
+    return self._state[key]
+           ~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 454, in __getitem__
+    raise KeyError(_missing_key_error_message(key))
+KeyError: 'st.session_state has no key "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/minimal_dashboard.py", line 194, in bot_loop
+    log_api_call("/api/v3/trade_init", "success", 0.5)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/minimal_dashboard.py", line 113, in log_api_call
+    st.session_state.api_logs.append({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 132, in __getattr__
+    raise AttributeError(_missing_attr_error_message(key))
+AttributeError: st.session_state has no attribute "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+
+2025-03-06 00:59:16,481 - __main__ - ERROR - Traceback: Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 452, in __getitem__
+    return self._getitem(widget_id, key)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 497, in _getitem
+    raise KeyError
+KeyError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 130, in __getattr__
+    return self[key]
+           ~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 101, in __getitem__
+    return get_session_state()[key]
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/safe_session_state.py", line 96, in __getitem__
+    return self._state[key]
+           ~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 454, in __getitem__
+    raise KeyError(_missing_key_error_message(key))
+KeyError: 'st.session_state has no key "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/minimal_dashboard.py", line 194, in bot_loop
+    log_api_call("/api/v3/trade_init", "success", 0.5)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/minimal_dashboard.py", line 113, in log_api_call
+    st.session_state.api_logs.append({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 132, in __getattr__
+    raise AttributeError(_missing_attr_error_message(key))
+AttributeError: st.session_state has no attribute "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+
+2025-03-06 00:59:16,481 - __main__ - ERROR - Traceback: Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 452, in __getitem__
+    return self._getitem(widget_id, key)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 497, in _getitem
+    raise KeyError
+KeyError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 130, in __getattr__
+    return self[key]
+           ~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 101, in __getitem__
+    return get_session_state()[key]
+           ~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/safe_session_state.py", line 96, in __getitem__
+    return self._state[key]
+           ~~~~~~~~~~~^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state.py", line 454, in __getitem__
+    raise KeyError(_missing_key_error_message(key))
+KeyError: 'st.session_state has no key "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/minimal_dashboard.py", line 194, in bot_loop
+    log_api_call("/api/v3/trade_init", "success", 0.5)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/minimal_dashboard.py", line 113, in log_api_call
+    st.session_state.api_logs.append({
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/streamlit/runtime/state/session_state_proxy.py", line 132, in __getattr__
+    raise AttributeError(_missing_attr_error_message(key))
+AttributeError: st.session_state has no attribute "api_logs". Did you forget to initialize it? More info: https://docs.streamlit.io/develop/concepts/architecture/session-state#initialization
+
+2025-03-06 00:59:16,484 - __main__ - INFO - Bot loop ended
+2025-03-06 00:59:16,484 - __main__ - INFO - Bot loop ended
+2025-03-06 00:59:16,484 - __main__ - INFO - Bot loop ended
+2025-03-06 00:59:16,484 - __main__ - INFO - Bot loop ended
+2025-03-06 00:59:20,905 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:20,905 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:20,905 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:20,905 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:20,905 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:20,906 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:20,906 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:20,906 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:20,906 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:20,906 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:20,906 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:20,906 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:20,906 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:20,906 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:20,906 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:20,906 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:20,906 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:20,906 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:20,906 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:20,906 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:20,906 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:20,906 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:20,906 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:20,906 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:20,906 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:20,906 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:20,906 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:20,906 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:20,906 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:20,906 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:21,219 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:21,219 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:21,219 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:21,219 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:21,219 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:22,095 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:22,095 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:22,095 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:22,095 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:22,095 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:22,150 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:22,150 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:22,150 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:22,150 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:22,150 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:22,151 - __main__ - DEBUG - Rendering Start Bot button (disabled=True)
+2025-03-06 00:59:22,151 - __main__ - DEBUG - Rendering Start Bot button (disabled=True)
+2025-03-06 00:59:22,151 - __main__ - DEBUG - Rendering Start Bot button (disabled=True)
+2025-03-06 00:59:22,151 - __main__ - DEBUG - Rendering Start Bot button (disabled=True)
+2025-03-06 00:59:22,151 - __main__ - DEBUG - Rendering Start Bot button (disabled=True)
+2025-03-06 00:59:22,153 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:22,153 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:22,153 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:22,153 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:22,153 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:27,327 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:27,327 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:27,327 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:27,327 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:27,327 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:27,327 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-06 00:59:27,328 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:27,328 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:27,328 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:27,328 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:27,328 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:27,328 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:27,328 - __main__ - INFO - Successfully imported API keys
+2025-03-06 00:59:27,328 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:27,328 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:27,328 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:27,328 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:27,328 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:27,328 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-06 00:59:27,329 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:27,329 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:27,329 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:27,329 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:27,329 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:27,329 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-06 00:59:27,649 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:27,649 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:27,649 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:27,649 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:27,649 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:27,649 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-06 00:59:28,518 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:28,518 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:28,518 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:28,518 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:28,518 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:28,518 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-06 00:59:28,586 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:28,586 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:28,586 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:28,586 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:28,586 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:28,586 - __main__ - DEBUG - Rendering bot controls section
+2025-03-06 00:59:28,587 - __main__ - DEBUG - Rendering Start Bot button (disabled=True)
+2025-03-06 00:59:28,587 - __main__ - DEBUG - Rendering Start Bot button (disabled=True)
+2025-03-06 00:59:28,587 - __main__ - DEBUG - Rendering Start Bot button (disabled=True)
+2025-03-06 00:59:28,587 - __main__ - DEBUG - Rendering Start Bot button (disabled=True)
+2025-03-06 00:59:28,587 - __main__ - DEBUG - Rendering Start Bot button (disabled=True)
+2025-03-06 00:59:28,587 - __main__ - DEBUG - Rendering Start Bot button (disabled=True)
+2025-03-06 00:59:28,592 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:28,592 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:28,592 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:28,592 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:28,592 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:28,592 - __main__ - DEBUG - Rendering Stop Bot button (disabled=False)
+2025-03-06 00:59:28,593 - __main__ - DEBUG - Stop Bot button clicked
+2025-03-06 00:59:28,593 - __main__ - DEBUG - Stop Bot button clicked
+2025-03-06 00:59:28,593 - __main__ - DEBUG - Stop Bot button clicked
+2025-03-06 00:59:28,593 - __main__ - DEBUG - Stop Bot button clicked
+2025-03-06 00:59:28,593 - __main__ - DEBUG - Stop Bot button clicked
+2025-03-06 00:59:28,593 - __main__ - DEBUG - Stop Bot button clicked
+2025-03-06 00:59:28,594 - __main__ - DEBUG - stop_bot called
+2025-03-06 00:59:28,594 - __main__ - DEBUG - stop_bot called
+2025-03-06 00:59:28,594 - __main__ - DEBUG - stop_bot called
+2025-03-06 00:59:28,594 - __main__ - DEBUG - stop_bot called
+2025-03-06 00:59:28,594 - __main__ - DEBUG - stop_bot called
+2025-03-06 00:59:28,594 - __main__ - DEBUG - stop_bot called
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting stop_bot flag
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting stop_bot flag
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting stop_bot flag
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting stop_bot flag
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting stop_bot flag
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting stop_bot flag
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting bot_running to False
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting bot_running to False
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting bot_running to False
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting bot_running to False
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting bot_running to False
+2025-03-06 00:59:28,594 - __main__ - DEBUG - Setting bot_running to False
+2025-03-06 00:59:28,594 - __main__ - INFO - Bot stopped successfully
+2025-03-06 00:59:28,594 - __main__ - INFO - Bot stopped successfully
+2025-03-06 00:59:28,594 - __main__ - INFO - Bot stopped successfully
+2025-03-06 00:59:28,594 - __main__ - INFO - Bot stopped successfully
+2025-03-06 00:59:28,594 - __main__ - INFO - Bot stopped successfully
+2025-03-06 00:59:28,594 - __main__ - INFO - Bot stopped successfully
