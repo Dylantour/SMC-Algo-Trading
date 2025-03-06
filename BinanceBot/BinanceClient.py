@@ -1,5 +1,5 @@
 from binance.client import Client
-from PySide2.QtCore import QThread
+from PyQt5.QtCore import QThread
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -105,17 +105,27 @@ class BinanceClient:
         # get account balance
 
         try:
-
-            binance_info = self.client.get_account()
-
-        except:
-            print("cannot get account info from binance")
+            info = self.client.get_account()
+            balance = 0
+            for item in info["balances"]:
+                if item["asset"] == self.base_asset:
+                    self.base_balance = float(item["free"])
+                if item["asset"] == self.asset:
+                    self.asset_balance = float(item["free"])
+        except Exception as e:
+            print(f"cannot get account info from binance: {str(e)}")
+            if hasattr(e, 'response') and hasattr(e.response, 'text'):
+                print(f"Error response: {e.response.text}")
+            if hasattr(e, 'status_code'):
+                print(f"Status code: {e.status_code}")
+            print(f"Using API key: {self.api_key[:8]}...{self.api_key[-8:]}")
+            print("Please check your API key permissions in Binance")
 
             return
 
         self.update_time = time.time()
 
-        balance = binance_info['balances']
+        balance = info['balances']
 
         balances = {}
         for i in balance:

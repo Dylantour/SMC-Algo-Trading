@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-run_bot.py - Main entry point to run the Binance trading bot
+run_ict_bot.py - ICT Strategy Bot Runner
 
-This script serves as a standalone Binance bot runner, handling initialization,
-parameter configuration, and trading execution.
+This script serves as a standalone runner for the ICT strategy, with added
+visualization capabilities and real-time strategy analysis.
 """
 
 import time
@@ -13,10 +13,11 @@ import logging
 import argparse
 import key
 from trade import ICTTraderClient
+from ict_visualization import ICTVisualizer
 
 
 def setup_logging():
-    """Configure logging for the bot"""
+    """Configure logging for the ICT bot"""
     log_path = "logs"
     
     # Ensure log directory exists
@@ -24,7 +25,7 @@ def setup_logging():
         os.makedirs(log_path)
     
     # Set up logging
-    log_file = os.path.join(log_path, "binance_bot.log")
+    log_file = os.path.join(log_path, "ict_bot.log")
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(message)s",
@@ -38,20 +39,22 @@ def setup_logging():
 
 def parse_arguments():
     """Parse command line arguments"""
-    parser = argparse.ArgumentParser(description='Run the Binance Trading Bot')
+    parser = argparse.ArgumentParser(description='Run the ICT Strategy Bot')
     
     parser.add_argument('--pair', type=str, default='BTCBUSD',
                         help='Trading pair (default: BTCBUSD)')
     parser.add_argument('--htf', type=str, default='1h',
-                        help='Higher timeframe for market structure analysis (default: 1h)')
+                        help='Higher timeframe for market structure (default: 1h)')
     parser.add_argument('--ltf', type=str, default='5m',
                         help='Lower timeframe for entries (default: 5m)')
     parser.add_argument('--risk', type=float, default=0.01,
                         help='Risk per trade as a decimal (default: 0.01)')
-    parser.add_argument('--min-fvg-size', type=float, default=0.0005,
-                        help='Minimum fair value gap size (default: 0.0005)')
     parser.add_argument('--trail', type=float, default=0.8,
                         help='Trail stop ratio (default: 0.8)')
+    parser.add_argument('--min-fvg-size', type=float, default=0.0005,
+                        help='Minimum fair value gap size (default: 0.0005)')
+    parser.add_argument('--visualize', action='store_true',
+                        help='Enable visualization (saves charts)')
     
     return parser.parse_args()
 
@@ -60,7 +63,7 @@ def main():
     """Main execution function"""
     # Set up logging
     logger = setup_logging()
-    logger.info("Starting Binance Trading Bot")
+    logger.info("Starting ICT Strategy Bot")
     
     # Parse command line arguments
     args = parse_arguments()
@@ -71,8 +74,8 @@ def main():
         logger.warning("Please update the key.py file with your Binance API credentials.")
 
     try:
-        # Initialize the Binance client with ICT strategy
-        logger.info(f"Initializing trading client for {args.pair} with HTF: {args.htf}, LTF: {args.ltf}")
+        # Initialize the ICT strategy client
+        logger.info(f"Initializing ICT strategy for {args.pair} with HTF: {args.htf}, LTF: {args.ltf}")
         
         trader = ICTTraderClient(key.key, key.secret)
         
@@ -96,18 +99,46 @@ def main():
         
         # Set mode
         trader.mode = "trade"
-        trader.plot = False
+        trader.plot = args.visualize
         
-        # Initialize and start trading
-        logger.info("Starting trading process")
+        # Initialize visualization if requested
+        if args.visualize:
+            logger.info("Visualization enabled - charts will be saved")
+            visualizer = ICTVisualizer(trader)
+            
+            # Create directory for charts if it doesn't exist
+            charts_dir = "charts"
+            if not os.path.exists(charts_dir):
+                os.makedirs(charts_dir)
+        
+        # Initialize and update data
         trader.update()
+        
+        # Show initial market structure if visualization is enabled
+        if args.visualize:
+            visualizer.plot_market_structure(save_path=f"charts/market_structure_{args.pair}_{args.htf}.png")
+            logger.info(f"Initial market structure chart saved to charts/market_structure_{args.pair}_{args.htf}.png")
+        
+        # Start trading
+        logger.info("Starting trading process")
         time.sleep(0.3)
         trader.start()
     
     except KeyboardInterrupt:
         logger.info("Bot manually stopped by user")
+        
+        # Generate trade report on exit if trades were made
+        if args.visualize and hasattr(trader, 'trade_history') and trader.trade_history:
+            try:
+                visualizer = ICTVisualizer(trader)
+                report_path = f"charts/trade_report_{args.pair}_{args.ltf}.html"
+                visualizer.create_trade_report(filename=report_path)
+                logger.info(f"Trade report generated: {report_path}")
+            except Exception as e:
+                logger.error(f"Error generating trade report: {e}")
+    
     except Exception as e:
-        logger.error(f"Error in trading bot: {e}", exc_info=True)
+        logger.error(f"Error in ICT strategy bot: {e}", exc_info=True)
 
 
 if __name__ == "__main__":

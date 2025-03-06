@@ -1,0 +1,59 @@
+2025-03-06 02:39:26,150 [INFO] Starting Binance Trading Bot
+2025-03-06 02:39:39,345 [INFO] Starting Binance Trading Bot
+2025-03-06 02:39:39,346 [INFO] Initializing trading client for BTCBUSD with HTF: 1h, LTF: 5m
+2025-03-06 02:39:40,044 [INFO] Starting trading process
+2025-03-06 02:39:40,631 [ERROR] Error in trading bot: single positional indexer is out-of-bounds
+Traceback (most recent call last):
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/BinanceBot/run_bot.py", line 103, in main
+    trader.update()
+    ~~~~~~~~~~~~~^^
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/BinanceBot/trade.py", line 78, in update
+    self.data_process()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/BinanceBot/trade.py", line 86, in data_process
+    self.process_htf_data()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/BinanceBot/trade.py", line 99, in process_htf_data
+    self.htf_bias = self.determine_market_structure(df)
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/BinanceBot/trade.py", line 144, in determine_market_structure
+    if sma20.iloc[-1] > sma50.iloc[-1] and sma20.iloc[-1] > sma20.iloc[-2]:
+       ~~~~~~~~~~^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/pandas/core/indexing.py", line 1191, in __getitem__
+    return self._getitem_axis(maybe_callable, axis=axis)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/pandas/core/indexing.py", line 1752, in _getitem_axis
+    self._validate_integer(key, axis)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/pandas/core/indexing.py", line 1685, in _validate_integer
+    raise IndexError("single positional indexer is out-of-bounds")
+IndexError: single positional indexer is out-of-bounds
+2025-03-06 02:40:28,975 [INFO] Starting Binance Trading Bot
+2025-03-06 02:40:28,976 [INFO] Initializing trading client for BTCBUSD with HTF: 1h, LTF: 5m
+2025-03-06 02:40:29,295 [INFO] Starting trading process
+2025-03-06 02:40:31,782 [ERROR] Error in trading bot: single positional indexer is out-of-bounds
+Traceback (most recent call last):
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/BinanceBot/run_bot.py", line 105, in main
+    trader.start()
+    ~~~~~~~~~~~~^^
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/BinanceBot/BinanceClient.py", line 96, in start
+    self.trade_loop()
+    ~~~~~~~~~~~~~~~^^
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/BinanceBot/BinanceClient.py", line 711, in trade_loop
+    self.manager()
+    ~~~~~~~~~~~~^^
+  File "/Users/dylan/Documents/GitHub/SMC-Algo-Trading/BinanceBot/trade.py", line 416, in manager
+    ts = self.update_trailstop(self.df.iloc[-1])
+                               ~~~~~~~~~~~~^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/pandas/core/indexing.py", line 1191, in __getitem__
+    return self._getitem_axis(maybe_callable, axis=axis)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/pandas/core/indexing.py", line 1752, in _getitem_axis
+    self._validate_integer(key, axis)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/pandas/core/indexing.py", line 1685, in _validate_integer
+    raise IndexError("single positional indexer is out-of-bounds")
+IndexError: single positional indexer is out-of-bounds
+2025-03-06 02:41:30,505 [INFO] Starting Binance Trading Bot
+2025-03-06 02:41:30,505 [INFO] Initializing trading client for BTCBUSD with HTF: 1h, LTF: 5m
+2025-03-06 02:41:30,960 [INFO] Starting trading process

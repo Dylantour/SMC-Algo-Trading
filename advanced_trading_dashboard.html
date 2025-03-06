@@ -98,14 +98,40 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .card-title {
-            font-size: 18px;
             font-weight: 600;
+            font-size: 18px;
             color: var(--primary-color);
+        }
+
+        .token-selector {
+            grid-column: span 3;
+        }
+
+        #tokenOptions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .token-option {
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f0f4ff;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .token-option:hover {
+            background-color: #e3eaff;
+        }
+
+        .token-option.active {
+            background-color: var(--primary-color);
+            color: white;
         }
 
         .bot-status {
@@ -117,33 +143,7 @@
         }
 
         .trading-stats {
-            grid-column: span 6;
-        }
-
-        .token-selector {
-            grid-column: span 12;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .token-option {
-            padding: 8px 16px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .token-option.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .token-option:hover {
-            border-color: var(--primary-color);
+            grid-column: span 3;
         }
 
         .recent-trades {
@@ -158,34 +158,15 @@
             grid-column: span 12;
         }
 
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        .status-running {
-            background-color: var(--success-color);
-        }
-
-        .status-stopped {
-            background-color: var(--danger-color);
-        }
-
-        .status-text {
-            font-weight: 600;
-        }
-
         .info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 15px;
         }
 
         .info-item {
-            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
         }
 
         .info-label {
@@ -199,16 +180,32 @@
             font-weight: 600;
         }
 
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        .status-running {
+            background-color: var(--success-color);
+        }
+
+        .status-stopped {
+            background-color: var(--danger-color);
+        }
+
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
         }
 
         .stat-card {
-            background-color: rgba(41, 98, 255, 0.1);
-            border-radius: 6px;
             padding: 15px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
             text-align: center;
         }
 
@@ -231,11 +228,14 @@
             color: var(--danger-color);
         }
 
+        .status-open {
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 14px;
         }
 
         th, td {
@@ -252,23 +252,28 @@
         .log-container, .api-container {
             max-height: 300px;
             overflow-y: auto;
+            font-size: 14px;
         }
 
-        .log-entry, .api-entry {
-            padding: 8px 0;
+        .log-entry {
+            padding: 8px;
             border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
+        }
+
+        .api-entry {
+            display: grid;
+            grid-template-columns: 80px 1fr 80px 80px;
+            gap: 10px;
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .timestamp {
             color: var(--light-text);
-            margin-right: 10px;
-            font-size: 12px;
         }
 
         .endpoint {
-            color: var(--primary-color);
-            font-weight: 600;
+            font-family: monospace;
         }
 
         .status-success {
@@ -280,22 +285,20 @@
         }
 
         @media (max-width: 1200px) {
-            .bot-status, .market-overview, .trading-stats {
-                grid-column: span 4;
-            }
-            .recent-trades, .api-activity {
+            .token-selector, .bot-status, .market-overview, .trading-stats {
                 grid-column: span 6;
+            }
+            
+            .recent-trades, .api-activity {
+                grid-column: span 12;
             }
         }
 
         @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
+            .token-selector, .bot-status, .market-overview, .trading-stats {
+                grid-column: span 12;
             }
-            .bot-status, .market-overview, .trading-stats,
-            .recent-trades, .api-activity, .bot-logs {
-                grid-column: span 1;
-            }
+            
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -392,6 +395,10 @@
                         <div class="stat-label">Total Trades</div>
                     </div>
                     <div class="stat-card">
+                        <div id="openPositions" class="stat-value">0</div>
+                        <div class="stat-label">Open Positions</div>
+                    </div>
+                    <div class="stat-card">
                         <div id="winRate" class="stat-value">0%</div>
                         <div class="stat-label">Win Rate</div>
                     </div>
@@ -417,7 +424,7 @@
                             <th>Type</th>
                             <th>Price</th>
                             <th>Amount</th>
-                            <th>P/L</th>
+                            <th>Status/P&L</th>
                         </tr>
                     </thead>
                     <tbody id="tradesTableBody">
@@ -430,8 +437,8 @@
                 <div class="card-header">
                     <div class="card-title">API Activity</div>
                 </div>
-                <div class="api-container" id="apiActivity">
-                    <!-- API activity entries will be added here -->
+                <div id="apiActivity" class="api-container">
+                    <!-- API calls will be added here -->
                 </div>
             </div>
 
@@ -439,7 +446,7 @@
                 <div class="card-header">
                     <div class="card-title">Bot Logs</div>
                 </div>
-                <div class="log-container" id="botLogs">
+                <div id="botLogs" class="log-container">
                     <!-- Log entries will be added here -->
                 </div>
             </div>
@@ -447,23 +454,6 @@
     </div>
 
     <script>
-        // Global state
-        const state = {
-            running: false,
-            logs: [],
-            apiCalls: [],
-            trades: [],
-            priceHistory: [],
-            currentPrice: 0,
-            symbol: 'BTCUSDT',
-            totalTrades: 0,
-            winningTrades: 0,
-            initialBalance: 10000,
-            balance: 10000,
-            lastUpdate: null,
-            iterations: 0
-        };
-
         // DOM Elements
         const startBotBtn = document.getElementById('startBotBtn');
         const stopBotBtn = document.getElementById('stopBotBtn');
@@ -483,6 +473,26 @@
         const apiActivity = document.getElementById('apiActivity');
         const botLogs = document.getElementById('botLogs');
         const tokenOptions = document.getElementById('tokenOptions');
+
+        // Global state
+        const state = {
+            running: false,
+            iterations: 0,
+            lastUpdate: null,
+            symbol: 'BTCUSDT',
+            currentPrice: 0,
+            totalTrades: 0,
+            winningTrades: 0,
+            initialBalance: 10000,
+            balance: 10000,
+            trades: [],
+            openPositions: [], // Track open buy positions
+            completedTrades: [], // Track completed trades (buy + sell pairs)
+            logs: [],
+            apiCalls: [],
+            apiKey: '', // You would set this from your environment or user input
+            apiSecret: '' // You would set this from your environment or user input
+        };
 
         // Add log entry
         function addLog(message) {
@@ -529,45 +539,109 @@
         }
 
         // Add trade
-        function addTrade(type, price, amount, profitLoss) {
+        function addTrade(type, price, amount, profitLoss = null) {
             const now = new Date();
             const timestamp = now.toLocaleTimeString();
+            const tradeId = Date.now().toString(); // Unique ID for the trade
             
-            state.trades.unshift({
-                timestamp,
-                type,
-                price,
-                amount,
-                profitLoss
-            });
-            
-            // Update UI
-            const row = document.createElement('tr');
-            const profitLossClass = profitLoss >= 0 ? 'positive' : 'negative';
-            const profitLossPrefix = profitLoss >= 0 ? '+' : '';
-            
-            row.innerHTML = `
-                <td>${timestamp}</td>
-                <td>${type}</td>
-                <td>$${price.toFixed(2)}</td>
-                <td>${amount.toFixed(6)}</td>
-                <td class="${profitLossClass}">${profitLossPrefix}$${Math.abs(profitLoss).toFixed(2)}</td>
-            `;
-            
-            tradesTableBody.insertBefore(row, tradesTableBody.firstChild);
+            if (type === 'BUY') {
+                // Create a new open position
+                const position = {
+                    id: tradeId,
+                    timestamp,
+                    entryPrice: price,
+                    amount,
+                    status: 'OPEN'
+                };
+                
+                state.openPositions.push(position);
+                
+                // Update UI - Add to open positions
+                const row = document.createElement('tr');
+                row.setAttribute('data-position-id', tradeId);
+                row.innerHTML = `
+                    <td>${timestamp}</td>
+                    <td>${type}</td>
+                    <td>$${price.toFixed(2)}</td>
+                    <td>${amount.toFixed(6)}</td>
+                    <td class="status-open">OPEN</td>
+                `;
+                
+                tradesTableBody.insertBefore(row, tradesTableBody.firstChild);
+                
+                addLog(`Opened position: Bought ${amount} ${state.symbol.slice(0, -4)} at $${price.toFixed(2)}`);
+            } else if (type === 'SELL') {
+                // Find the oldest open position to close
+                if (state.openPositions.length === 0) {
+                    addLog(`Error: Attempted to sell with no open positions`);
+                    return;
+                }
+                
+                const position = state.openPositions.shift(); // Get the oldest position (FIFO)
+                const entryPrice = position.entryPrice;
+                const buyAmount = position.amount;
+                
+                // Calculate actual profit/loss
+                const calculatedProfitLoss = (price - entryPrice) * buyAmount;
+                
+                // Create a completed trade record
+                const completedTrade = {
+                    buyTimestamp: position.timestamp,
+                    sellTimestamp: timestamp,
+                    buyPrice: entryPrice,
+                    sellPrice: price,
+                    amount: buyAmount,
+                    profitLoss: calculatedProfitLoss
+                };
+                
+                state.completedTrades.push(completedTrade);
+                
+                // Update UI - Update the existing row or add a new one
+                const existingRow = document.querySelector(`tr[data-position-id="${position.id}"]`);
+                if (existingRow) {
+                    // Update existing row
+                    const profitLossClass = calculatedProfitLoss >= 0 ? 'positive' : 'negative';
+                    const profitLossPrefix = calculatedProfitLoss >= 0 ? '+' : '';
+                    
+                    existingRow.innerHTML = `
+                        <td>${position.timestamp} → ${timestamp}</td>
+                        <td>BUY → SELL</td>
+                        <td>$${entryPrice.toFixed(2)} → $${price.toFixed(2)}</td>
+                        <td>${buyAmount.toFixed(6)}</td>
+                        <td class="${profitLossClass}">${profitLossPrefix}$${Math.abs(calculatedProfitLoss).toFixed(2)}</td>
+                    `;
+                } else {
+                    // Add new row if the original buy row is not found
+                    const row = document.createElement('tr');
+                    const profitLossClass = calculatedProfitLoss >= 0 ? 'positive' : 'negative';
+                    const profitLossPrefix = calculatedProfitLoss >= 0 ? '+' : '';
+                    
+                    row.innerHTML = `
+                        <td>${position.timestamp} → ${timestamp}</td>
+                        <td>BUY → SELL</td>
+                        <td>$${entryPrice.toFixed(2)} → $${price.toFixed(2)}</td>
+                        <td>${buyAmount.toFixed(6)}</td>
+                        <td class="${profitLossClass}">${profitLossPrefix}$${Math.abs(calculatedProfitLoss).toFixed(2)}</td>
+                    `;
+                    
+                    tradesTableBody.insertBefore(row, tradesTableBody.firstChild);
+                }
+                
+                // Update stats
+                state.totalTrades++;
+                if (calculatedProfitLoss > 0) {
+                    state.winningTrades++;
+                }
+                
+                state.balance += calculatedProfitLoss;
+                
+                addLog(`Closed position: Sold ${buyAmount} ${state.symbol.slice(0, -4)} at $${price.toFixed(2)} (P/L: ${calculatedProfitLoss >= 0 ? '+' : ''}$${calculatedProfitLoss.toFixed(2)})`);
+            }
             
             // Keep only the last 20 trades in the table
             if (tradesTableBody.children.length > 20) {
                 tradesTableBody.removeChild(tradesTableBody.lastChild);
             }
-            
-            // Update stats
-            state.totalTrades++;
-            if (profitLoss > 0) {
-                state.winningTrades++;
-            }
-            
-            state.balance += profitLoss;
             
             updateStats();
         }
@@ -586,6 +660,12 @@
             profitLoss.className = pnl >= 0 ? 'stat-value positive' : 'stat-value negative';
             
             balance.textContent = `$${state.balance.toFixed(2)}`;
+            
+            // Add open positions count to the UI if not already present
+            const openPositionsElement = document.getElementById('openPositions');
+            if (openPositionsElement) {
+                openPositionsElement.textContent = state.openPositions.length;
+            }
         }
 
         // Fetch current price from Binance
@@ -663,20 +743,24 @@
                     await fetch24hTicker();
                 }
                 
-                // Simulate a trade every 10 iterations
+                // Simulate trades
                 if (state.iterations % 10 === 0) {
-                    const isBuy = Math.random() > 0.5;
-                    const amount = parseFloat((Math.random() * 0.01).toFixed(6));
-                    const profitLoss = isBuy ? 0 : parseFloat((Math.random() * 200 - 100).toFixed(2));
+                    // Randomly decide to buy or sell
+                    const action = Math.random() > 0.5 ? 'BUY' : 'SELL';
                     
-                    addTrade(
-                        isBuy ? 'BUY' : 'SELL',
-                        state.currentPrice,
-                        amount,
-                        profitLoss
-                    );
-                    
-                    addLog(`${isBuy ? 'Bought' : 'Sold'} ${amount} ${state.symbol.slice(0, 3)} at $${state.currentPrice.toFixed(2)}`);
+                    // Only allow sell if there are open positions
+                    if (action === 'SELL' && state.openPositions.length === 0) {
+                        // Force a buy if there are no open positions
+                        const amount = parseFloat((Math.random() * 0.01).toFixed(6));
+                        addTrade('BUY', state.currentPrice, amount);
+                    } else if (action === 'BUY') {
+                        // Create a new buy position
+                        const amount = parseFloat((Math.random() * 0.01).toFixed(6));
+                        addTrade('BUY', state.currentPrice, amount);
+                    } else {
+                        // Sell an existing position
+                        addTrade('SELL', state.currentPrice, 0); // Amount is taken from the open position
+                    }
                 }
                 
             } catch (error) {
