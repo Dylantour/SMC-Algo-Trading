@@ -85,3 +85,9 @@
 2025-03-08 15:51:29,235 [INFO] Price update thread started
 2025-03-08 15:51:29,238 [INFO] Bot thread started
 2025-03-08 15:52:39,502 [INFO] Closed position: BTCUSDT SELL at 37930.68 with PnL: 5.07%
+2025-03-08 15:56:34,813 [INFO] Opened new position: BTCUSDT BUY at 36008.179044546356
+2025-03-08 15:57:04,848 [INFO] Opened new position: ETHUSDT BUY at 2311.3926029664194
+2025-03-08 16:17:25,935 [INFO] Starting trading bot with strategy: Smart Money Concepts
+2025-03-08 16:17:25,936 [INFO] Trading symbols: BTCUSDT, ETHUSDT
+2025-03-08 16:17:25,937 [INFO] Price update thread started
+2025-03-08 16:17:25,937 [INFO] Bot thread started
