@@ -1,861 +1,414 @@
-#!/usr/bin/env python3
-"""
-trade.py - ICT Trading Strategy Implementation
-
-This script implements the ICT trading strategy for the Binance trading bot.
-"""
-
-import os
-import sys
-import time
-import datetime
-import logging
-import json
+from BinanceClient import BinanceClient
+import key
+import time, datetime
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-from collections import deque
+import ta
+import sys
 
-# Import BinanceClient
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from BinanceBot.BinanceClient import BinanceClient
-
-# Set up logging
-logging.basicConfig(level=logging.INFO,
-                   format='%(asctime)s [%(levelname)s] %(message)s',
-                   handlers=[
-                       logging.FileHandler("logs/trade_py.log"),
-                       logging.StreamHandler(sys.stdout)
-                   ])
-logger = logging.getLogger(__name__)
 
 class LoggingPrinter:
     def __init__(self):
         self.old_stdout = sys.stdout
-        self.log_file = open("logs/trade_py.log", "a")
-
-    def write(self, text):
-        self.old_stdout.write(text)
-        self.log_file.write(text)
-        self.log_file.flush()
-    
-    def flush(self):
-        self.old_stdout.flush()
-        self.log_file.flush()
-
-    def __enter__(self):
         sys.stdout = self
+    
+    def write(self, text):
+        self.out_file = open("trade_py.log", 'a')
+        self.old_stdout.write(text)
+        self.out_file.write(text)
+        self.out_file.close()
+    
+    def __enter__(self):
         return self
-
+    
     def __exit__(self, type, value, traceback):
         sys.stdout = self.old_stdout
-        self.log_file.close()
+
 
 class ICTTraderClient(BinanceClient):
     def __init__(self, _key, _secret):
-        """
-        Initialize the ICT Trading Strategy Client.
+        BinanceClient.__init__(self, _key, _secret)
         
-        Args:
-            _key (str): Binance API key
-            _secret (str): Binance API secret
-        """
-        logger.info("Initializing ICT Trading Strategy Client")
-        super().__init__(_key, _secret)
+        # Strategy parameters
+        self.htf_interval = "1h"  # Higher timeframe for market structure bias
+        self.ltf_interval = "5m"  # Lower timeframe for entries
+        self.ltf_df_length = 100  # Number of candles to fetch for lower timeframe
+        self.htf_df_length = 50   # Number of candles to fetch for higher timeframe
         
-        # ICT specific parameters
-        self.htf_interval = "1h"
-        self.htf_df_length = 50
-        self.min_fvg_size = 0.0005
-        self.risk_per_trade = 0.01
-        self.rr_ratio = 2.0
-        self.position_open = False
-        self.position_type = None
-        self.htf_bias = "Neutral"
-        self.active_fvgs = []
-        self.valid_entries = []
-        self.entry_price = 0
-        self.stop_loss = 0
-        self.take_profit = 0
-        self.risk_amount = 0
-        self.trail_stop = 0.8
-        self.trail_stop_enabled = True
-        self.plot = False
-        self.trade_history = []
+        # FVG Parameters
+        self.min_fvg_size = 0.0005  # Minimum FVG size as percentage of price (0.05%)
+        self.max_fvg_age = 20       # Maximum age of FVG in candles
         
-        # Create directories for charts and logs
-        os.makedirs("charts", exist_ok=True)
-        os.makedirs("logs", exist_ok=True)
+        # Strategy state variables
+        self.htf_bias = None        # 'bullish' or 'bearish'
+        self.active_fvgs = []       # List of active FVGs
+        self.pending_orders = []    # List of pending orders for FVG retests
+        self.last_liquidity_sweep = None
         
-        # Debug mode
-        self.debug_mode = True
-        logger.info("ICT Trading Strategy Client initialized")
+        # Data frames
+        self.htf_df = None         # Higher timeframe dataframe
+        self.ltf_df = None         # Lower timeframe dataframe
         
+        # Risk management
+        self.risk_per_trade = 0.01  # 1% risk per trade
+        self.risk_reward_ratio = 2  # Risk to reward ratio
+        self.partial_tp_ratio = 0.5 # Close 50% of position at first TP
+    
     def update(self):
-        """
-        Update market data and account information.
-        """
-        try:
-            logger.info(f"Updating market data for {self.pair}")
-            # Call the parent method to update base data
-            super().update()
-            
-            # Update HTF data
-            self.update_htf_data()
-            
-            # Process data for ICT strategy
-            self.data_process()
-            
-            # Print status (debug)
-            if self.debug_mode:
-                logger.info(f"Current price: {self.asset_price}")
-                logger.info(f"HTF Bias: {self.htf_bias}")
-                logger.info(f"Active FVGs: {len(self.active_fvgs)}")
-                logger.info(f"Position open: {self.position_open}")
-                if self.position_open:
-                    logger.info(f"Position type: {self.position_type}")
-                
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error updating market data: {e}", exc_info=True)
-            return False
-    
-    def update_htf_data(self):
-        """
-        Update higher timeframe data for market structure analysis.
-        """
-        try:
-            logger.info(f"Updating HTF data ({self.htf_interval})")
-            
-            # Get HTF candles from Binance
-            htf_candles = self.client.get_klines(
-                symbol=self.pair,
-                interval=self.htf_interval,
-                limit=self.htf_df_length
-            )
-            
-            # Create HTF DataFrame
-            self.htf_df = pd.DataFrame(htf_candles, columns=[
-                'timestamp', 'open', 'high', 'low', 'close', 'volume',
-                'close_time', 'quote_asset_volume', 'trades',
-                'taker_buy_base', 'taker_buy_quote', 'ignored'
-            ])
-            
-            # Convert string columns to numeric
-            for col in ['open', 'high', 'low', 'close', 'volume']:
-                self.htf_df[col] = pd.to_numeric(self.htf_df[col])
-                
-            # Convert timestamp to datetime
-            self.htf_df['timestamp'] = pd.to_datetime(self.htf_df['timestamp'], unit='ms')
-            
-            if self.debug_mode:
-                logger.info(f"HTF data updated - {len(self.htf_df)} candles")
-                
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error updating HTF data: {e}", exc_info=True)
-            return False
+        """Override the update method to fetch both timeframes"""
+        super().update()  # Call parent's update first
 
+        # Store the current LTF dataframe
+        self.ltf_df = self.df.copy()
+        
+        # Get HTF data
+        original_interval = self.interval
+        original_df_length = self.df_length
+        
+        self.interval = self.htf_interval
+        self.df_length = self.htf_df_length
+        
+        self.htf_df = self.get_candles()
+        
+        # Restore original settings
+        self.interval = original_interval
+        self.df_length = original_df_length
+        
+        # Process both dataframes
+        self.data_process()
+        
     def data_process(self):
-        """
-        Process market data for ICT strategy.
-        """
-        try:
-            logger.info("Processing market data for ICT strategy")
+        """Process both timeframes"""
+        if self.ltf_df is None or self.htf_df is None:
+            return
             
-            # Process higher timeframe data for market structure
-            self.process_htf_data()
-            
-            # Process lower timeframe data for entries
-            self.process_ltf_data()
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error processing data: {e}", exc_info=True)
-            return False
-    
+        # Process higher timeframe for market structure bias
+        self.process_htf_data()
+        
+        # Process lower timeframe for entry setups
+        self.process_ltf_data()
+        
     def process_htf_data(self):
-        """
-        Process higher timeframe data to determine market structure.
-        """
-        try:
-            if not hasattr(self, 'htf_df') or self.htf_df.empty:
-                logger.warning("No HTF data available for processing")
-                return False
-                
-            # Calculate swing highs and lows
-            self.htf_df = self.calculate_swings(self.htf_df)
-            
-            # Determine market structure
-            self.determine_market_structure(self.htf_df)
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error processing HTF data: {e}", exc_info=True)
-            return False
+        """Process higher timeframe data for market structure bias"""
+        df = self.htf_df
+        
+        # Calculate swing highs and lows on HTF
+        self.calculate_swings(df, window=5)
+        
+        # Determine market structure based on recent swings
+        self.htf_bias = self.determine_market_structure(df)
+        
+        # Log the current bias
+        print(f"HTF Bias: {self.htf_bias}")
     
     def calculate_swings(self, df, window=5):
-        """
-        Calculate swing highs and lows in the dataframe.
+        """Calculate swing highs and lows"""
+        df['swing_high'] = False
+        df['swing_low'] = False
         
-        Args:
-            df (DataFrame): Price dataframe
-            window (int): Window size for identifying swings
+        for i in range(window, len(df) - window):
+            # Check for swing high
+            if all(df['high'].iloc[i] > df['high'].iloc[i-j] for j in range(1, window+1)) and \
+               all(df['high'].iloc[i] > df['high'].iloc[i+j] for j in range(1, window+1)):
+                df.at[df.index[i], 'swing_high'] = True
             
-        Returns:
-            DataFrame: Updated dataframe with swing points
-        """
-        try:
-            # Copy the dataframe to avoid modifying the original
-            df = df.copy()
-            
-            # Initialize swing high/low columns
-            df['swing_high'] = False
-            df['swing_low'] = False
-            
-            # Calculate swing highs
-            for i in range(window, len(df) - window):
-                # Check if current high is the highest in the window
-                if df['high'].iloc[i] == df['high'].iloc[i-window:i+window+1].max():
-                    df.loc[df.index[i], 'swing_high'] = True
-            
-            # Calculate swing lows
-            for i in range(window, len(df) - window):
-                # Check if current low is the lowest in the window
-                if df['low'].iloc[i] == df['low'].iloc[i-window:i+window+1].min():
-                    df.loc[df.index[i], 'swing_low'] = True
-            
-            return df
-            
-        except Exception as e:
-            logger.error(f"Error calculating swings: {e}", exc_info=True)
-            return df
-    
+            # Check for swing low
+            if all(df['low'].iloc[i] < df['low'].iloc[i-j] for j in range(1, window+1)) and \
+               all(df['low'].iloc[i] < df['low'].iloc[i+j] for j in range(1, window+1)):
+                df.at[df.index[i], 'swing_low'] = True
+        
     def determine_market_structure(self, df):
-        """
-        Determine market structure based on swing highs and lows.
+        """Determine market structure as bullish or bearish"""
+        # Get last 4 swing points
+        recent_swings = pd.DataFrame()
         
-        Args:
-            df (DataFrame): Dataframe with swing high/low columns
-        """
-        try:
-            # Get recent swings
-            recent_df = df.iloc[-20:].copy()
+        # Extract swing highs
+        swing_highs = df[df['swing_high'] == True].copy()
+        swing_highs['type'] = 'high'
+        swing_highs['value'] = swing_highs['high']
+        
+        # Extract swing lows
+        swing_lows = df[df['swing_low'] == True].copy()
+        swing_lows['type'] = 'low'
+        swing_lows['value'] = swing_lows['low']
+        
+        # Combine and sort
+        swings = pd.concat([swing_highs, swing_lows])
+        swings = swings.sort_index().tail(4)
+        
+        if len(swings) < 4:
+            # Not enough swing points, use SMA slope as fallback
+            sma50 = df['close'].rolling(50).mean()
+            sma20 = df['close'].rolling(20).mean()
             
-            # Get swing highs and lows
-            swing_highs = recent_df[recent_df['swing_high']]['high'].tolist()
-            swing_lows = recent_df[recent_df['swing_low']]['low'].tolist()
-            
-            # Ensure we have at least 2 swing points of each type
-            if len(swing_highs) < 2 or len(swing_lows) < 2:
-                logger.warning("Not enough swing points to determine market structure")
-                self.htf_bias = "Neutral"
-                return
-            
-            # Check for higher highs and higher lows (uptrend)
-            if swing_highs[-1] > swing_highs[-2] and swing_lows[-1] > swing_lows[-2]:
-                self.htf_bias = "Bullish"
-                logger.info("Market structure: Bullish - Higher Highs, Higher Lows")
-                
-            # Check for lower highs and lower lows (downtrend)
-            elif swing_highs[-1] < swing_highs[-2] and swing_lows[-1] < swing_lows[-2]:
-                self.htf_bias = "Bearish"
-                logger.info("Market structure: Bearish - Lower Highs, Lower Lows")
-                
-            # Check for lower highs and higher lows (consolidation - potential reversal up)
-            elif swing_highs[-1] < swing_highs[-2] and swing_lows[-1] > swing_lows[-2]:
-                self.htf_bias = "Consolidation"
-                logger.info("Market structure: Consolidation - Lower Highs, Higher Lows")
-                
-            # Check for higher highs and lower lows (expansion - potential reversal down)
-            elif swing_highs[-1] > swing_highs[-2] and swing_lows[-1] < swing_lows[-2]:
-                self.htf_bias = "Expansion"
-                logger.info("Market structure: Expansion - Higher Highs, Lower Lows")
-                
+            if sma20.iloc[-1] > sma50.iloc[-1] and sma20.iloc[-1] > sma20.iloc[-2]:
+                return 'bullish'
+            elif sma20.iloc[-1] < sma50.iloc[-1] and sma20.iloc[-1] < sma20.iloc[-2]:
+                return 'bearish'
             else:
-                self.htf_bias = "Neutral"
-                logger.info("Market structure: Neutral - No clear pattern")
-            
-            # Save chart if plot is enabled
-            if self.plot:
-                self.plot_market_structure(recent_df)
-                
-        except Exception as e:
-            logger.error(f"Error determining market structure: {e}", exc_info=True)
-            self.htf_bias = "Neutral"
-    
-    def plot_market_structure(self, df):
-        """
-        Plot market structure for visualization.
+                return 'neutral'
         
-        Args:
-            df (DataFrame): Dataframe with market structure
-        """
-        try:
-            plt.figure(figsize=(12, 6))
-            
-            # Plot price
-            plt.plot(df.index, df['close'], color='blue', label='Price')
-            
-            # Plot swing highs and lows
-            plt.scatter(df[df['swing_high']].index, df[df['swing_high']]['high'], 
-                      color='red', marker='^', s=100, label='Swing High')
-            plt.scatter(df[df['swing_low']].index, df[df['swing_low']]['low'], 
-                      color='green', marker='v', s=100, label='Swing Low')
-            
-            # Add labels and title
-            plt.title(f'Market Structure Analysis - {self.pair} ({self.htf_interval})')
-            plt.xlabel('Time')
-            plt.ylabel('Price')
-            plt.legend()
-            plt.grid(True)
-            
-            # Save the chart
-            chart_path = f'charts/market_structure_{self.pair}_{self.htf_interval}.png'
-            plt.savefig(chart_path)
-            plt.close()
-            logger.info(f"Market structure chart saved to {chart_path}")
-            
-        except Exception as e:
-            logger.error(f"Error plotting market structure: {e}", exc_info=True)
+        # Check if we have higher highs and higher lows (bullish)
+        if swings['type'].iloc[-2] == 'high' and swings['type'].iloc[-4] == 'high':
+            if swings['value'].iloc[-2] > swings['value'].iloc[-4]:
+                return 'bullish'
+        
+        # Check if we have lower lows and lower highs (bearish)
+        if swings['type'].iloc[-2] == 'low' and swings['type'].iloc[-4] == 'low':
+            if swings['value'].iloc[-2] < swings['value'].iloc[-4]:
+                return 'bearish'
+        
+        # Default to neutral
+        return 'neutral'
     
     def process_ltf_data(self):
-        """
-        Process lower timeframe data for trade entries.
-        """
-        try:
-            if not hasattr(self, 'df') or self.df.empty:
-                logger.warning("No LTF data available for processing")
-                return False
-            
-            # Detect liquidity sweeps
-            self.df = self.detect_liquidity_sweeps(self.df)
-            
-            # Detect fair value gaps
-            self.df = self.detect_fair_value_gaps(self.df)
-            
-            # Update active FVGs - remove filled ones
-            self.update_active_fvgs(self.df)
-            
-            # Check for FVG retests (potential entries)
-            self.check_fvg_retests(self.df)
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error processing LTF data: {e}", exc_info=True)
-            return False
+        """Process lower timeframe data for entries"""
+        df = self.ltf_df
+        
+        # Detect liquidity sweeps
+        self.detect_liquidity_sweeps(df)
+        
+        # Detect fair value gaps
+        self.detect_fair_value_gaps(df)
+        
+        # Update active FVGs (remove filled or expired ones)
+        self.update_active_fvgs(df)
+        
+        # Look for FVG retests
+        self.check_fvg_retests(df)
     
     def detect_liquidity_sweeps(self, df):
-        """
-        Detect liquidity sweeps in price action.
+        """Detect liquidity sweeps of recent swing points"""
+        # Look at the last 5 candles
+        recent_candles = df.tail(5)
         
-        Args:
-            df (DataFrame): Price dataframe
+        # Find recent swing lows and highs
+        lookback = 20
+        if len(df) <= lookback:
+            return None
             
-        Returns:
-            DataFrame: Updated dataframe with liquidity sweep info
-        """
-        try:
-            # Copy the dataframe to avoid modifying the original
-            df = df.copy()
-            
-            # Calculate swing points
-            df = self.calculate_swings(df, window=3)
-            
-            # Initialize liquidity sweep columns
-            df['liquidity_sweep_high'] = False
-            df['liquidity_sweep_low'] = False
-            
-            # Find liquidity sweeps
-            sweep_count_high = 0
-            sweep_count_low = 0
-            
-            for i in range(4, len(df)):
-                # Bullish liquidity sweep (sweep lows then reverse up)
-                if (df['swing_low'].iloc[i-2] and 
-                    df['low'].iloc[i-1] < df['low'].iloc[i-2] and 
-                    df['close'].iloc[i] > df['close'].iloc[i-1]):
-                    df.loc[df.index[i-1], 'liquidity_sweep_low'] = True
-                    sweep_count_low += 1
-                    logger.debug(f"Bullish liquidity sweep detected at {df.index[i-1]}")
-                
-                # Bearish liquidity sweep (sweep highs then reverse down)
-                if (df['swing_high'].iloc[i-2] and 
-                    df['high'].iloc[i-1] > df['high'].iloc[i-2] and 
-                    df['close'].iloc[i] < df['close'].iloc[i-1]):
-                    df.loc[df.index[i-1], 'liquidity_sweep_high'] = True
-                    sweep_count_high += 1
-                    logger.debug(f"Bearish liquidity sweep detected at {df.index[i-1]}")
-            
-            logger.info(f"Detected liquidity sweeps - Bullish: {sweep_count_low}, Bearish: {sweep_count_high}")
-            return df
-            
-        except Exception as e:
-            logger.error(f"Error detecting liquidity sweeps: {e}", exc_info=True)
-            return df
+        # Find the lowest low and highest high in the lookback period (excluding last 5 candles)
+        recent_low = df['low'].iloc[-lookback:-5].min()
+        recent_high = df['high'].iloc[-lookback:-5].max()
+        
+        # Check if recent candles have swept below the swing low and then reversed
+        if any(recent_candles['low'] < recent_low * 0.999) and recent_candles['close'].iloc[-1] > recent_candles['open'].iloc[-1]:
+            # Bullish sweep (swept lows then reversed up)
+            if self.htf_bias == 'bullish':  # Only consider sweeps in the direction of HTF bias
+                print(f"Detected Bullish Liquidity Sweep: Swept low at {recent_low}")
+                self.last_liquidity_sweep = {
+                    'type': 'bullish',
+                    'price': recent_low,
+                    'candle_index': len(df) - 1,
+                    'time': df.index[-1]
+                }
+                return self.last_liquidity_sweep
+        
+        # Check if recent candles have swept above the swing high and then reversed
+        if any(recent_candles['high'] > recent_high * 1.001) and recent_candles['close'].iloc[-1] < recent_candles['open'].iloc[-1]:
+            # Bearish sweep (swept highs then reversed down)
+            if self.htf_bias == 'bearish':  # Only consider sweeps in the direction of HTF bias
+                print(f"Detected Bearish Liquidity Sweep: Swept high at {recent_high}")
+                self.last_liquidity_sweep = {
+                    'type': 'bearish',
+                    'price': recent_high,
+                    'candle_index': len(df) - 1,
+                    'time': df.index[-1]
+                }
+                return self.last_liquidity_sweep
+        
+        return None
     
     def detect_fair_value_gaps(self, df):
-        """
-        Detect fair value gaps after liquidity sweeps.
+        """Detect fair value gaps (FVGs) after displacement candles"""
+        if self.last_liquidity_sweep is None:
+            return
+            
+        # Look for displacement after liquidity sweep
+        sweep_idx = self.last_liquidity_sweep['candle_index']
         
-        Args:
-            df (DataFrame): Price dataframe with liquidity sweep info
+        # We need at least 3 candles after the sweep to form an FVG
+        if len(df) < sweep_idx + 3:
+            return
             
-        Returns:
-            DataFrame: Updated dataframe with FVG info
-        """
-        try:
-            # Copy the dataframe to avoid modifying the original
-            df = df.copy()
+        # Check for bullish FVG (Candle 3's low is above Candle 1's high)
+        if self.last_liquidity_sweep['type'] == 'bullish':
+            # Get candles involved in potential FVG
+            candle1_idx = sweep_idx
+            candle2_idx = sweep_idx + 1  # Displacement candle
+            candle3_idx = sweep_idx + 2
             
-            # Initialize FVG columns
-            df['bullish_fvg'] = False
-            df['bearish_fvg'] = False
-            df['bullish_fvg_low'] = np.nan
-            df['bullish_fvg_high'] = np.nan
-            df['bearish_fvg_low'] = np.nan
-            df['bearish_fvg_high'] = np.nan
+            candle1 = df.iloc[candle1_idx]
+            candle2 = df.iloc[candle2_idx]
+            candle3 = df.iloc[candle3_idx]
             
-            # Look for FVGs after liquidity sweeps
-            for i in range(3, len(df)):
-                # Bullish FVG after liquidity sweep low
-                # (Low of the candle after the liquidity sweep is higher than the high of the candle before)
-                if df['liquidity_sweep_low'].iloc[i-2]:
-                    # Check for a gap up
-                    if df['low'].iloc[i] > df['high'].iloc[i-2]:
-                        # This is a bullish FVG
-                        df.loc[df.index[i], 'bullish_fvg'] = True
-                        df.loc[df.index[i], 'bullish_fvg_low'] = df['high'].iloc[i-2]
-                        df.loc[df.index[i], 'bullish_fvg_high'] = df['low'].iloc[i]
-                        
-                        # Calculate FVG size as a percentage
-                        fvg_size = (df['low'].iloc[i] - df['high'].iloc[i-2]) / df['high'].iloc[i-2]
-                        
-                        # Only consider FVGs larger than the minimum size
-                        if fvg_size >= self.min_fvg_size:
-                            # Add to active FVGs if not already tracked
-                            fvg_data = {
-                                'type': 'bullish',
-                                'created_time': df.index[i],
-                                'low': df['high'].iloc[i-2],
-                                'high': df['low'].iloc[i],
-                                'size': fvg_size,
-                                'filled': False,
-                                'retested': False
-                            }
-                            
-                            # Check if this FVG is already in our list
-                            if not any(fvg['created_time'] == fvg_data['created_time'] for fvg in self.active_fvgs):
-                                self.active_fvgs.append(fvg_data)
-                                logger.info(f"Bullish FVG detected: {fvg_size:.2%} size")
+            # Check if candle 2 is a strong bullish candle
+            is_bullish_displacement = (candle2['close'] > candle2['open'] and 
+                                    (candle2['close'] - candle2['open']) / candle2['open'] > 0.001)
+            
+            # Check if there's a gap between candle 1 high and candle 3 low
+            if is_bullish_displacement and candle3['low'] > candle1['high']:
+                fvg_size = (candle3['low'] - candle1['high']) / candle1['high']
                 
-                # Bearish FVG after liquidity sweep high
-                # (High of the candle after the liquidity sweep is lower than the low of the candle before)
-                if df['liquidity_sweep_high'].iloc[i-2]:
-                    # Check for a gap down
-                    if df['high'].iloc[i] < df['low'].iloc[i-2]:
-                        # This is a bearish FVG
-                        df.loc[df.index[i], 'bearish_fvg'] = True
-                        df.loc[df.index[i], 'bearish_fvg_low'] = df['high'].iloc[i]
-                        df.loc[df.index[i], 'bearish_fvg_high'] = df['low'].iloc[i-2]
-                        
-                        # Calculate FVG size as a percentage
-                        fvg_size = (df['low'].iloc[i-2] - df['high'].iloc[i]) / df['low'].iloc[i-2]
-                        
-                        # Only consider FVGs larger than the minimum size
-                        if fvg_size >= self.min_fvg_size:
-                            # Add to active FVGs if not already tracked
-                            fvg_data = {
-                                'type': 'bearish',
-                                'created_time': df.index[i],
-                                'low': df['high'].iloc[i],
-                                'high': df['low'].iloc[i-2],
-                                'size': fvg_size,
-                                'filled': False,
-                                'retested': False
-                            }
-                            
-                            # Check if this FVG is already in our list
-                            if not any(fvg['created_time'] == fvg_data['created_time'] for fvg in self.active_fvgs):
-                                self.active_fvgs.append(fvg_data)
-                                logger.info(f"Bearish FVG detected: {fvg_size:.2%} size")
+                # Only consider significant FVGs
+                if fvg_size >= self.min_fvg_size:
+                    fvg = {
+                        'type': 'bullish',
+                        'top': candle3['low'],
+                        'bottom': candle1['high'],
+                        'mid': (candle3['low'] + candle1['high']) / 2,
+                        'size': fvg_size,
+                        'age': 0,
+                        'created_at': df.index[candle3_idx],
+                        'filled': False
+                    }
+                    
+                    self.active_fvgs.append(fvg)
+                    print(f"Detected Bullish FVG: {fvg['bottom']} to {fvg['top']}, size: {fvg['size']*100:.2f}%")
+        
+        # Check for bearish FVG (Candle 3's high is below Candle 1's low)
+        elif self.last_liquidity_sweep['type'] == 'bearish':
+            # Get candles involved in potential FVG
+            candle1_idx = sweep_idx
+            candle2_idx = sweep_idx + 1  # Displacement candle
+            candle3_idx = sweep_idx + 2
             
-            return df
+            candle1 = df.iloc[candle1_idx]
+            candle2 = df.iloc[candle2_idx]
+            candle3 = df.iloc[candle3_idx]
             
-        except Exception as e:
-            logger.error(f"Error detecting fair value gaps: {e}", exc_info=True)
-            return df
+            # Check if candle 2 is a strong bearish candle
+            is_bearish_displacement = (candle2['close'] < candle2['open'] and 
+                                     (candle2['open'] - candle2['close']) / candle2['open'] > 0.001)
+            
+            # Check if there's a gap between candle 1 low and candle 3 high
+            if is_bearish_displacement and candle3['high'] < candle1['low']:
+                fvg_size = (candle1['low'] - candle3['high']) / candle1['low']
+                
+                # Only consider significant FVGs
+                if fvg_size >= self.min_fvg_size:
+                    fvg = {
+                        'type': 'bearish',
+                        'top': candle1['low'],
+                        'bottom': candle3['high'],
+                        'mid': (candle1['low'] + candle3['high']) / 2,
+                        'size': fvg_size,
+                        'age': 0,
+                        'created_at': df.index[candle3_idx],
+                        'filled': False
+                    }
+                    
+                    self.active_fvgs.append(fvg)
+                    print(f"Detected Bearish FVG: {fvg['top']} to {fvg['bottom']}, size: {fvg['size']*100:.2f}%")
     
     def update_active_fvgs(self, df):
-        """
-        Update active FVGs based on current price action.
-        
-        Args:
-            df (DataFrame): Current price dataframe
-        """
-        try:
-            if not self.active_fvgs:
-                return
-                
-            current_price = df['close'].iloc[-1]
-            last_low = df['low'].iloc[-1]
-            last_high = df['high'].iloc[-1]
+        """Update active FVGs (remove filled or expired ones)"""
+        if not self.active_fvgs:
+            return
             
-            # Check each active FVG to see if it's been filled
-            for fvg in self.active_fvgs:
-                if fvg['filled']:
-                    continue
-                    
-                if fvg['type'] == 'bullish':
-                    # Bullish FVG is filled if price trades below the FVG low
-                    if last_low <= fvg['low']:
-                        fvg['filled'] = True
-                        logger.info(f"Bullish FVG from {fvg['created_time']} has been filled")
-                        
-                elif fvg['type'] == 'bearish':
-                    # Bearish FVG is filled if price trades above the FVG high
-                    if last_high >= fvg['high']:
-                        fvg['filled'] = True
-                        logger.info(f"Bearish FVG from {fvg['created_time']} has been filled")
-            
-            # Remove filled FVGs that are older than 20 candles
-            current_time = df.index[-1]
-            self.active_fvgs = [fvg for fvg in self.active_fvgs if 
-                              not fvg['filled'] or 
-                              (current_time - fvg['created_time']).total_seconds() < 20 * 60 * self.get_interval_seconds()]
-                              
-        except Exception as e:
-            logger.error(f"Error updating active FVGs: {e}", exc_info=True)
-    
-    def get_interval_seconds(self):
-        """
-        Convert interval string to seconds.
+        latest_price = df['close'].iloc[-1]
+        updated_fvgs = []
         
-        Returns:
-            int: Interval in seconds
-        """
-        interval = self.interval
-        if interval.endswith('m'):
-            return int(interval[:-1]) * 60
-        elif interval.endswith('h'):
-            return int(interval[:-1]) * 60 * 60
-        elif interval.endswith('d'):
-            return int(interval[:-1]) * 60 * 60 * 24
-        return 60  # Default to 1m
+        for fvg in self.active_fvgs:
+            # Increment age
+            fvg['age'] += 1
+            
+            # Check if FVG has been filled
+            if fvg['type'] == 'bullish':
+                # A bullish FVG is filled if price drops below the middle of the gap
+                if df['low'].iloc[-1] <= fvg['mid']:
+                    fvg['filled'] = True
+                    print(f"Bullish FVG from {fvg['created_at']} has been filled")
+            else:
+                # A bearish FVG is filled if price rises above the middle of the gap
+                if df['high'].iloc[-1] >= fvg['mid']:
+                    fvg['filled'] = True
+                    print(f"Bearish FVG from {fvg['created_at']} has been filled")
+            
+            # Keep FVG if it's not too old and not filled
+            if fvg['age'] <= self.max_fvg_age and not fvg['filled']:
+                updated_fvgs.append(fvg)
+        
+        self.active_fvgs = updated_fvgs
     
     def check_fvg_retests(self, df):
-        """
-        Check if price is retesting any FVGs for potential entries.
+        """Check for retests of active FVGs to generate entry signals"""
+        if not self.active_fvgs or self.position_open:
+            return
+            
+        latest_candle = df.iloc[-1]
+        latest_price = latest_candle['close']
         
-        Args:
-            df (DataFrame): Current price dataframe
-        """
-        try:
-            if not self.active_fvgs or self.position_open:
-                return
-                
-            current_price = df['close'].iloc[-1]
-            
-            # Reset valid entries
-            self.valid_entries = []
-            
-            # Check each active FVG
-            for fvg in self.active_fvgs:
-                if fvg['filled'] or fvg['retested']:
-                    continue
-                
-                # Only consider entries that align with HTF bias
-                if fvg['type'] == 'bullish' and self.htf_bias != 'Bearish':
-                    # Bullish entry when price retests the top of the FVG
-                    if current_price <= fvg['high'] and current_price >= fvg['low']:
-                        # Mark as retested
-                        fvg['retested'] = True
-                        
-                        # Calculate entry parameters
-                        entry_price = current_price
-                        stop_loss = fvg['low'] * 0.996  # Just below the FVG low
-                        risk_amount = entry_price - stop_loss
-                        take_profit = entry_price + (risk_amount * self.rr_ratio)
-                        
-                        # Add to valid entries
-                        entry_data = {
-                            'type': 'long',
-                            'entry_price': entry_price,
-                            'stop_loss': stop_loss,
-                            'take_profit': take_profit,
-                            'risk_amount': risk_amount,
-                            'fvg': fvg
-                        }
-                        
-                        self.valid_entries.append(entry_data)
-                        logger.info(f"Bullish entry signal: Entry: {entry_price}, SL: {stop_loss}, TP: {take_profit}")
-                        
-                elif fvg['type'] == 'bearish' and self.htf_bias != 'Bullish':
-                    # Bearish entry when price retests the bottom of the FVG
-                    if current_price >= fvg['low'] and current_price <= fvg['high']:
-                        # Mark as retested
-                        fvg['retested'] = True
-                        
-                        # Calculate entry parameters
-                        entry_price = current_price
-                        stop_loss = fvg['high'] * 1.004  # Just above the FVG high
-                        risk_amount = stop_loss - entry_price
-                        take_profit = entry_price - (risk_amount * self.rr_ratio)
-                        
-                        # Add to valid entries
-                        entry_data = {
-                            'type': 'short',
-                            'entry_price': entry_price,
-                            'stop_loss': stop_loss,
-                            'take_profit': take_profit,
-                            'risk_amount': risk_amount,
-                            'fvg': fvg
-                        }
-                        
-                        self.valid_entries.append(entry_data)
-                        logger.info(f"Bearish entry signal: Entry: {entry_price}, SL: {stop_loss}, TP: {take_profit}")
-            
-            # Take the best entry if multiple are available
-            if self.valid_entries:
-                # Sort by risk/reward (higher is better)
-                self.valid_entries.sort(key=lambda x: abs(x['take_profit'] - x['entry_price']) / abs(x['stop_loss'] - x['entry_price']), reverse=True)
-                
-                # Log the best entry
-                best_entry = self.valid_entries[0]
-                logger.info(f"Best entry: {best_entry['type'].upper()} at {best_entry['entry_price']}")
-                
-        except Exception as e:
-            logger.error(f"Error checking FVG retests: {e}", exc_info=True)
-
+        for fvg in self.active_fvgs:
+            # Check if price is retesting the FVG
+            if fvg['type'] == 'bullish':
+                # For bullish FVG, we enter when price pulls back to the FVG area
+                if latest_candle['low'] <= fvg['top'] and latest_candle['high'] >= fvg['bottom']:
+                    # Price is within FVG range, trigger entry
+                    entry_price = latest_price
+                    stop_loss = self.last_liquidity_sweep['price'] * 0.998  # Just below sweep low
+                    
+                    # Calculate take profit based on risk-reward
+                    risk = entry_price - stop_loss
+                    take_profit = entry_price + (risk * self.risk_reward_ratio)
+                    
+                    print(f"Bullish FVG Retest Triggered: Entry: {entry_price}, SL: {stop_loss}, TP: {take_profit}")
+                    
+                    # Place order
+                    self.buy()
+                    
+                    # Set custom stop loss and take profit
+                    self.tp = [take_profit]
+                    self.tp_ratio = [1.0]
+                    self.trail_stop_enabled = True
+                    self.trail_stop = 0.8  # Keep 80% of profits
+                    
+                    # Remove this FVG from active list
+                    self.active_fvgs.remove(fvg)
+                    return
+                    
+            elif fvg['type'] == 'bearish':
+                # For bearish FVG, we enter when price pulls back to the FVG area
+                if latest_candle['high'] >= fvg['bottom'] and latest_candle['low'] <= fvg['top']:
+                    # Price is within FVG range, trigger entry
+                    entry_price = latest_price
+                    stop_loss = self.last_liquidity_sweep['price'] * 1.002  # Just above sweep high
+                    
+                    # Calculate take profit based on risk-reward
+                    risk = stop_loss - entry_price
+                    take_profit = entry_price - (risk * self.risk_reward_ratio)
+                    
+                    print(f"Bearish FVG Retest Triggered: Entry: {entry_price}, SL: {stop_loss}, TP: {take_profit}")
+                    
+                    # Place order
+                    self.sell()
+                    
+                    # Set custom stop loss and take profit
+                    self.tp = [take_profit]
+                    self.tp_ratio = [1.0]
+                    self.trail_stop_enabled = True
+                    self.trail_stop = 0.8  # Keep 80% of profits
+                    
+                    # Remove this FVG from active list
+                    self.active_fvgs.remove(fvg)
+                    return
+    
     def manager(self):
-        """
-        Main strategy manager - decides when to enter and exit trades.
-        """
-        try:
-            logger.info("=== MANAGER EXECUTION START ===")
-            logger.info(f"Current position open: {self.position_open}")
-            logger.info(f"Market bias: {self.htf_bias}")
-            logger.info(f"Active FVGs: {len(self.active_fvgs)}")
+        """Main manager method to handle trading decisions"""
+        # Check for trail stop conditions first
+        ts = self.update_trailstop(self.df.iloc[-1])
+        if ts:
+            return 1
             
-            # Check if we're in a position
-            if self.position_open:
-                logger.info(f"Position type: {self.position_type}")
-                logger.info(f"Entry price: {self.entry_price}")
-                logger.info(f"Current price: {self.df['close'].iloc[-1]}")
-                logger.info(f"Stop loss: {self.stop_loss}")
-                logger.info(f"Take profit: {self.take_profit}")
-                
-                # Check if stop loss or take profit has been hit
-                current_price = self.df['close'].iloc[-1]
-                
-                if self.position_type == 'long':
-                    # Check if take profit hit
-                    if current_price >= self.take_profit:
-                        logger.info(f"Take profit hit at {current_price}")
-                        self.trade_sell()
-                        return
-                    
-                    # Check trailing stop if enabled
-                    if self.trail_stop_enabled and current_price > self.entry_price:
-                        trail_stop_price = current_price * (1 - self.trail_stop * (self.risk_amount / self.entry_price))
-                        if trail_stop_price > self.stop_loss:
-                            self.stop_loss = trail_stop_price
-                            logger.info(f"Updated trailing stop to {self.stop_loss}")
-                    
-                    # Check if stop loss hit
-                    if current_price <= self.stop_loss:
-                        logger.info(f"Stop loss hit at {current_price}")
-                        self.trade_sell()
-                        return
-                
-                elif self.position_type == 'short':
-                    logger.info("Checking short position conditions")
-                    # Check if take profit hit
-                    if current_price <= self.take_profit:
-                        logger.info(f"Take profit hit at {current_price}")
-                        self.trade_buy()
-                        return
-                    
-                    # Check trailing stop if enabled
-                    if self.trail_stop_enabled and current_price < self.entry_price:
-                        trail_stop_price = current_price * (1 + self.trail_stop * (self.risk_amount / self.entry_price))
-                        if trail_stop_price < self.stop_loss:
-                            self.stop_loss = trail_stop_price
-                            logger.info(f"Updated trailing stop to {self.stop_loss}")
-                    
-                    # Check if stop loss hit
-                    if current_price >= self.stop_loss:
-                        logger.info(f"Stop loss hit at {current_price}")
-                        self.trade_buy()
-                        return
+        # No need to do anything if the strategy is off
+        if self.htf_bias == 'neutral':
+            print("Market structure is neutral, no new trades")
+            return 0
             
-            # Check for new entry if not in a position
-            else:
-                # Process the data for ICT strategy
-                self.data_process()
-                
-                # Log FVG types
-                bullish_fvgs = [fvg for fvg in self.active_fvgs if fvg['type'] == 'bullish']
-                bearish_fvgs = [fvg for fvg in self.active_fvgs if fvg['type'] == 'bearish']
-                logger.info(f"Bullish FVGs: {len(bullish_fvgs)}, Bearish FVGs: {len(bearish_fvgs)}")
-                
-                # Log valid entries
-                logger.info(f"Valid entries: {len(self.valid_entries)}")
-                for i, entry in enumerate(self.valid_entries):
-                    logger.info(f"Entry {i+1}: Type: {entry['type']}, Price: {entry['entry_price']}, SL: {entry['stop_loss']}, TP: {entry['take_profit']}")
-                
-                # If we have valid entries, take the best one
-                if self.valid_entries:
-                    best_entry = self.valid_entries[0]
-                    
-                    # Set trade parameters
-                    self.entry_price = best_entry['entry_price']
-                    self.stop_loss = best_entry['stop_loss']
-                    self.take_profit = best_entry['take_profit']
-                    self.risk_amount = best_entry['risk_amount']
-                    self.position_type = best_entry['type']
-                    
-                    # Enter the position
-                    if best_entry['type'] == 'long':
-                        logger.info(f"Entering LONG position at {self.entry_price}")
-                        self.trade_buy()
-                    else:
-                        logger.info(f"Entering SHORT position at {self.entry_price}")
-                        self.trade_sell()
-                else:
-                    logger.info("No valid entry signals found")
-            
-            logger.info("=== MANAGER EXECUTION END ===")
-            
-        except Exception as e:
-            logger.error(f"Error in manager: {e}", exc_info=True)
-
-    def trade_buy(self):
-        """
-        Execute a buy trade and update position tracking.
-        """
-        try:
-            logger.info("Executing BUY trade")
-            
-            # Check if we're closing a short position or opening a long position
-            if self.position_open and self.position_type == 'short':
-                # Closing a short position
-                logger.info("Closing SHORT position")
-                super().trade_buy()
-                
-                # Calculate profit
-                exit_price = self.df['close'].iloc[-1]
-                profit_pct = (self.entry_price - exit_price) / self.entry_price * 100
-                
-                # Update trade history
-                if hasattr(self, 'trade_history') and self.trade_history:
-                    last_trade = self.trade_history[-1]
-                    last_trade['exit_time'] = datetime.datetime.now()
-                    last_trade['exit_price'] = exit_price
-                    last_trade['profit_pct'] = profit_pct
-                    last_trade['status'] = 'closed'
-                    
-                    logger.info(f"Closed SHORT position with {profit_pct:.2f}% profit")
-                
-                # Reset position tracking
-                self.position_open = False
-                self.position_type = None
-            else:
-                # Opening a long position
-                logger.info("Opening LONG position")
-                super().trade_buy()
-                
-                # Update position tracking
-                self.position_open = True
-                self.position_type = 'long'
-                
-                # Record trade in history
-                trade = {
-                    'type': 'long',
-                    'entry_time': datetime.datetime.now(),
-                    'entry_price': self.entry_price,
-                    'stop_loss': self.stop_loss,
-                    'take_profit': self.take_profit,
-                    'risk_amount': self.risk_amount
-                }
-                
-                # Add to trade history
-                if not hasattr(self, 'trade_history'):
-                    self.trade_history = []
-                self.trade_history.append(trade)
-                
-                logger.info(f"LONG position opened at {self.entry_price}")
-            
-            return True
-        except Exception as e:
-            logger.error(f"Error executing BUY trade: {e}", exc_info=True)
-            return False
-
-    def trade_sell(self):
-        """
-        Execute a sell trade and update position tracking.
-        """
-        try:
-            logger.info("Executing SELL trade")
-            # Check if we're closing a position or opening a short
-            if self.position_open and self.position_type == 'long':
-                # Closing a long position
-                logger.info("Closing LONG position")
-                super().trade_sell()
-                
-                # Calculate profit
-                exit_price = self.df['close'].iloc[-1]
-                profit_pct = (exit_price - self.entry_price) / self.entry_price * 100
-                
-                # Update trade history
-                if hasattr(self, 'trade_history') and self.trade_history:
-                    last_trade = self.trade_history[-1]
-                    last_trade['exit_time'] = datetime.datetime.now()
-                    last_trade['exit_price'] = exit_price
-                    last_trade['profit_pct'] = profit_pct
-                    last_trade['status'] = 'closed'
-                    
-                    logger.info(f"Closed LONG position with {profit_pct:.2f}% profit")
-                
-                # Reset position tracking
-                self.position_open = False
-                self.position_type = None
-                
-            else:
-                # Opening a short position
-                logger.info("Opening SHORT position")
-                super().trade_sell()
-                
-                # Update position tracking
-                self.position_open = True
-                self.position_type = 'short'
-                
-                # Record trade in history
-                trade = {
-                    'type': 'short',
-                    'entry_time': datetime.datetime.now(),
-                    'entry_price': self.entry_price,
-                    'stop_loss': self.stop_loss,
-                    'take_profit': self.take_profit,
-                    'risk_amount': self.risk_amount
-                }
-                
-                # Add to trade history
-                if not hasattr(self, 'trade_history'):
-                    self.trade_history = []
-                self.trade_history.append(trade)
-                
-                logger.info(f"SHORT position opened at {self.entry_price}")
-            
-            return True
-        except Exception as e:
-            logger.error(f"Error executing SELL trade: {e}", exc_info=True)
-            return False
+        # Check for FVG retests to generate entry signals
+        self.check_fvg_retests(self.ltf_df)
+        
+        return 0
 
 
 # Main execution code when run directly

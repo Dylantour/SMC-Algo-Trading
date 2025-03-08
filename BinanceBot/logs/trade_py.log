@@ -11233,3 +11233,114 @@ TypeError: unsupported operand type(s) for *: 'float' and 'NoneType'
 2025-03-06 03:15:03,936 [INFO] Valid entries: 0
 2025-03-06 03:15:03,937 [INFO] No valid entry signals found
 2025-03-06 03:15:03,937 [INFO] === MANAGER EXECUTION END ===
+2025-03-06 13:48:43,050 [INFO] Bot status updated: True, Strategy: ICT, Pairs: ['BTCBUSD', 'ETHBUSD', 'BNBBUSD']
+2025-03-06 13:48:43,050 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:48:43,050 [INFO] Starting web dashboard on port 8080
+2025-03-06 13:48:43,055 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://10.0.0.8:8080
+2025-03-06 13:48:43,055 [INFO] [33mPress CTRL+C to quit[0m
+2025-03-06 13:48:45,055 [INFO] Initializing ICT Trading Strategy Client
+2025-03-06 13:48:45,560 [INFO] Initializing ICT Trading Strategy Client
+2025-03-06 13:48:45,706 [INFO] ICT Trading Strategy Client initialized
+2025-03-06 13:48:45,706 [INFO] Created ICT trader for BTCBUSD
+2025-03-06 13:48:45,706 [INFO] Initializing market data for BTCBUSD
+2025-03-06 13:48:45,707 [INFO] Updating market data for BTCBUSD
+2025-03-06 13:48:45,874 [INFO] ICT Trading Strategy Client initialized
+2025-03-06 13:48:45,874 [INFO] Created ICT trader for ETHBUSD
+2025-03-06 13:48:45,874 [INFO] Initializing market data for ETHBUSD
+2025-03-06 13:48:45,874 [INFO] Updating market data for ETHBUSD
+2025-03-06 13:48:46,066 [INFO] Initializing ICT Trading Strategy Client
+2025-03-06 13:48:46,374 [INFO] ICT Trading Strategy Client initialized
+2025-03-06 13:48:46,374 [INFO] Created ICT trader for BNBBUSD
+2025-03-06 13:48:46,374 [INFO] Initializing market data for BNBBUSD
+2025-03-06 13:48:46,375 [INFO] Updating market data for BNBBUSD
+2025-03-06 13:48:46,570 [INFO] Started 3 trader threads
+2025-03-06 13:48:46,904 [INFO] Updating HTF data (1h)
+2025-03-06 13:48:47,044 [INFO] Updating HTF data (1h)
+2025-03-06 13:48:47,195 [INFO] HTF data updated - 50 candles
+2025-03-06 13:48:47,195 [INFO] Processing market data for ICT strategy
+2025-03-06 13:48:47,200 [WARNING] Not enough swing points to determine market structure
+2025-03-06 13:48:47,200 [WARNING] No LTF data available for processing
+2025-03-06 13:48:47,200 [INFO] Current price: None
+2025-03-06 13:48:47,200 [INFO] HTF Bias: Neutral
+2025-03-06 13:48:47,200 [INFO] Active FVGs: 0
+2025-03-06 13:48:47,200 [INFO] Position open: False
+2025-03-06 13:48:47,200 [ERROR] Failed to initialize market data for BTCBUSD
+2025-03-06 13:48:47,200 [ERROR] Failed to initialize trader for BTCBUSD, skipping
+2025-03-06 13:48:47,335 [INFO] HTF data updated - 50 candles
+2025-03-06 13:48:47,335 [INFO] Processing market data for ICT strategy
+2025-03-06 13:48:47,340 [WARNING] Not enough swing points to determine market structure
+2025-03-06 13:48:47,340 [WARNING] No LTF data available for processing
+2025-03-06 13:48:47,340 [INFO] Current price: None
+2025-03-06 13:48:47,340 [INFO] HTF Bias: Neutral
+2025-03-06 13:48:47,340 [INFO] Active FVGs: 0
+2025-03-06 13:48:47,340 [INFO] Position open: False
+2025-03-06 13:48:47,340 [ERROR] Failed to initialize market data for ETHBUSD
+2025-03-06 13:48:47,340 [ERROR] Failed to initialize trader for ETHBUSD, skipping
+2025-03-06 13:48:47,540 [INFO] Updating HTF data (1h)
+2025-03-06 13:48:47,844 [INFO] HTF data updated - 50 candles
+2025-03-06 13:48:47,844 [INFO] Processing market data for ICT strategy
+2025-03-06 13:48:47,848 [WARNING] Not enough swing points to determine market structure
+2025-03-06 13:48:47,848 [WARNING] No LTF data available for processing
+2025-03-06 13:48:47,848 [INFO] Current price: None
+2025-03-06 13:48:47,848 [INFO] HTF Bias: Neutral
+2025-03-06 13:48:47,848 [INFO] Active FVGs: 0
+2025-03-06 13:48:47,848 [INFO] Position open: False
+2025-03-06 13:48:47,848 [ERROR] Failed to initialize market data for BNBBUSD
+2025-03-06 13:48:47,848 [ERROR] Failed to initialize trader for BNBBUSD, skipping
+2025-03-06 13:48:48,054 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:48:53,059 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:48:58,064 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:03,070 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:08,075 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:13,080 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:18,086 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:23,087 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:28,089 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:33,094 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:38,099 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:43,106 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:48,111 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:53,117 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:49:58,120 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:03,126 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:08,136 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:13,140 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:18,151 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:23,161 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:28,163 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:33,167 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:38,178 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:43,188 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:48,194 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:53,204 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:50:58,215 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:51:03,216 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:51:08,223 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:51:13,233 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:51:18,244 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:51:23,254 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:51:28,259 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:51:33,270 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:51:38,278 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:51:43,287 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:51:48,297 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:52:48,681 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:52:53,686 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:52:58,688 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:03,693 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:08,697 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:13,703 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:18,709 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:23,714 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:28,719 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:33,725 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:38,729 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:43,734 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:48,740 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:53,745 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:53:58,751 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:54:03,756 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []
+2025-03-06 13:54:08,761 [INFO] Bot status updated: True, Strategy: ICT, Pairs: []

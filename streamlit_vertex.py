@@ -11,6 +11,7 @@ class Vertex:
         self.last = None
         self.next = None
         self.breaks = False
+        self.breaks_minor = False  # For internal structure breaks (IH/IL)
         self.is_first = False
         self.is_last = False
         self.protected_low = None
@@ -23,6 +24,10 @@ class Vertex:
         out.append(self.type)
         out.append(self.x)
         out.append(self.y)
+        if self.breaks:
+            out.append("BOS")
+        if self.breaks_minor:
+            out.append("BOS_MINOR")
         if self.is_cos:
             out.append("COS")
         if self.is_choch:

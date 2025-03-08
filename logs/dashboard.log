@@ -1,0 +1,9 @@
+2025-03-06 15:09:24,570 [INFO] Starting web dashboard on port 8080 with strategy: Original
+2025-03-06 15:09:24,571 [INFO] Monitoring pairs: BTCBUSD
+2025-03-06 15:09:29,016 [INFO] Starting web dashboard on port 8081 with strategy: Original
+2025-03-06 15:09:29,016 [INFO] Monitoring pairs: BTCBUSD
+2025-03-06 15:09:29,022 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8081
+ * Running on http://10.0.0.8:8081
+2025-03-06 15:09:29,022 [INFO] [33mPress CTRL+C to quit[0m

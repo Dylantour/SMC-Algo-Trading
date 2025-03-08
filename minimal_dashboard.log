@@ -451,3 +451,25 @@ AttributeError: st.session_state has no attribute "api_logs". Did you forget to 
 2025-03-06 00:59:28,594 - __main__ - INFO - Bot stopped successfully
 2025-03-06 00:59:28,594 - __main__ - INFO - Bot stopped successfully
 2025-03-06 00:59:28,594 - __main__ - INFO - Bot stopped successfully
+2025-03-08 00:46:31,845 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-08 00:46:31,845 - __main__ - INFO - Python path: ['/Users/dylan/Documents/GitHub/SMC-Algo-Trading', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-08 00:46:32,225 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-08 00:46:32,228 - __main__ - INFO - Successfully imported API keys
+2025-03-08 00:46:32,228 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-08 00:46:32,228 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-08 00:46:32,866 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-08 00:46:33,155 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-08 00:46:33,249 - __main__ - DEBUG - Rendering bot controls section
+2025-03-08 00:46:33,250 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-08 00:46:33,250 - __main__ - DEBUG - Rendering Stop Bot button (disabled=True)
+2025-03-08 00:46:40,406 - __main__ - INFO - Current directory: /Users/dylan/Documents/GitHub/SMC-Algo-Trading
+2025-03-08 00:46:40,407 - __main__ - INFO - Python path: ['minimal_dashboard.py', '', '/Library/Frameworks/Python.framework/Versions/3.13/bin', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python313.zip', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload', '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages', '/Users/dylan/Documents/GitHub/SMC-Algo-Trading']
+2025-03-08 00:46:40,717 - __main__ - INFO - Successfully imported BinanceClient from standalone_client
+2025-03-08 00:46:40,720 - __main__ - INFO - Successfully imported API keys
+2025-03-08 00:46:40,720 - __main__ - WARNING - Using default API key. Please update with your actual Binance API key.
+2025-03-08 00:46:40,720 - __main__ - DEBUG - Initializing BinanceClient with API keys
+2025-03-08 00:46:41,032 - __main__ - DEBUG - Testing client connection with update() method
+2025-03-08 00:46:41,320 - __main__ - INFO - BinanceClient initialized with base asset: BUSD, asset: BTC, pair: BTCBUSD
+2025-03-08 00:46:41,419 - __main__ - DEBUG - Rendering bot controls section
+2025-03-08 00:46:41,419 - __main__ - DEBUG - Rendering Start Bot button (disabled=False)
+2025-03-08 00:46:41,420 - __main__ - DEBUG - Rendering Stop Bot button (disabled=True)

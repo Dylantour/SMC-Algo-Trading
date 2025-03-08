@@ -284,6 +284,16 @@
             color: var(--danger-color);
         }
 
+        .strategy-selector {
+            padding: 5px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: 14px;
+            width: 100%;
+        }
+
         @media (max-width: 1200px) {
             .token-selector, .bot-status, .market-overview, .trading-stats {
                 grid-column: span 6;
@@ -356,7 +366,12 @@
                     </div>
                     <div class="info-item">
                         <div class="info-label">Strategy</div>
-                        <div class="info-value">Moving Average Crossover</div>
+                        <div class="info-value">
+                            <select id="strategy-selector" class="strategy-selector">
+                                <option value="Original">Original Strategy</option>
+                                <option value="ICT">ICT Strategy</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -491,7 +506,8 @@
             logs: [],
             apiCalls: [],
             apiKey: '', // You would set this from your environment or user input
-            apiSecret: '' // You would set this from your environment or user input
+            apiSecret: '', // You would set this from your environment or user input
+            strategy: 'Original'
         };
 
         // Add log entry
@@ -827,6 +843,34 @@
                 .catch(error => addLog(`Error initializing data: ${error.message}`));
         }
 
+        // Strategy change handler
+        document.getElementById('strategy-selector').addEventListener('change', function() {
+            const strategy = this.value;
+            
+            // Send strategy change to backend
+            fetch('/api/change_strategy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    strategy: strategy
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addLog(`Strategy changed to ${strategy}`);
+                    state.strategy = strategy;
+                } else {
+                    addLog(`Error changing strategy: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                addLog(`Error changing strategy: ${error.message}`);
+            });
+        });
+
         // Event listeners
         startBotBtn.addEventListener('click', startBot);
         stopBotBtn.addEventListener('click', stopBot);
@@ -840,6 +884,18 @@
             // Fetch initial data without starting the bot
             fetchCurrentPrice()
                 .then(() => fetch24hTicker())
+                .then(() => {
+                    // Fetch current strategy
+                    return fetch('/api/status')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.strategy) {
+                                document.getElementById('strategy-selector').value = data.strategy;
+                                state.strategy = data.strategy;
+                                addLog(`Current strategy: ${data.strategy}`);
+                            }
+                        });
+                })
                 .catch(error => addLog(`Error initializing data: ${error.message}`));
         }
         

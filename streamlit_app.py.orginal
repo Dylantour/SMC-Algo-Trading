@@ -1,0 +1,1583 @@
+#!/usr/bin/env python3
+"""
+Streamlit UI for SMC-Algo-Trading
+This provides a simple, cross-platform UI for the trading algorithm
+"""
+
+import streamlit as st
+
+# Page config - must be the first Streamlit command
+st.set_page_config(
+    page_title="SMC Algo Trading",
+    page_icon="📈",
+    layout="wide",
+)
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+from datetime import datetime, timedelta
+import os
+import sys
+
+# Import trading bot
+try:
+    import trading_bot
+    BOT_AVAILABLE = True
+except ImportError:
+    BOT_AVAILABLE = False
+    st.warning("Trading bot module not found. Some features will be disabled.")
+
+# Import project modules
+from Candle import Candle
+from streamlit_vertex import Vertex
+try:
+    from BinanceBot.standalone_client import BinanceClient as StandaloneClient
+    import BinanceBot.key as key
+    BINANCE_AVAILABLE = True
+except ImportError:
+    BINANCE_AVAILABLE = False
+    st.warning("Binance integration not available. Some features will be disabled.")
+
+# Header
+st.title("Smart Money Concepts Algo Trading")
+st.markdown("A Python library for building trading bots following Smart Money Concepts (SMC).")
+
+# Sidebar for controls
+st.sidebar.header("Market Controls")
+symbol = st.sidebar.selectbox(
+    "Select Symbol",
+    ["BTCUSDT", "ETHUSDT", "XRPUSDT", "ADAUSDT", "SOLUSDT", "DOTUSDT"],
+    index=0
+)
+
+timeframe = st.sidebar.selectbox(
+    "Select Timeframe",
+    ["1m", "3m", "5m", "15m", "1h", "4h", "1d", "1w", "1M"],
+    index=4
+)
+
+candle_count = st.sidebar.slider(
+    "Number of Candles", 
+    min_value=50, 
+    max_value=500, 
+    value=150,
+    step=50
+)
+
+smoothing = st.sidebar.slider(
+    "Smoothing Factor", 
+    min_value=0, 
+    max_value=100, 
+    value=50,
+    step=5
+)
+
+# Add Trading Bot Controls
+st.sidebar.markdown("---")
+st.sidebar.header("Trading Bot Controls")
+
+bot_running = False  # Default status
+trading_symbols = ["BTCUSDT", "ETHUSDT"]  # Default symbols
+
+if BOT_AVAILABLE:
+    try:
+        # Get current bot status
+        bot_status = trading_bot.get_bot_status()
+        # Check if 'running' key exists in the dictionary
+        if "running" in bot_status:
+            bot_running = bot_status["running"]
+        elif "status" in bot_status:
+            # Alternative key that might be used
+            bot_running = bot_status["status"] == "Running"
+        
+        # Bot on/off status display
+        if bot_running:
+            st.sidebar.success("Trading Bot is ACTIVE")
+        else:
+            st.sidebar.error("Trading Bot is INACTIVE")
+        
+        # Active trading symbols
+        if "active_symbols" in bot_status and bot_running:
+            default_symbols = bot_status["active_symbols"]
+        else:
+            default_symbols = ["BTCUSDT", "ETHUSDT"]
+            
+        trading_symbols = st.sidebar.multiselect(
+            "Trading Symbols",
+            ["BTCUSDT", "ETHUSDT", "XRPUSDT", "ADAUSDT", "SOLUSDT", "DOTUSDT"],
+            default=default_symbols
+        )
+    except Exception as e:
+        st.sidebar.error(f"Error connecting to trading bot: {e}")
+        st.sidebar.warning("Using default settings instead")
+else:
+    st.sidebar.warning("Trading Bot module not available")
+    
+    # Still show UI elements but they won't be functional
+    trading_symbols = st.sidebar.multiselect(
+        "Trading Symbols",
+        ["BTCUSDT", "ETHUSDT", "XRPUSDT", "ADAUSDT", "SOLUSDT", "DOTUSDT"],
+        default=["BTCUSDT", "ETHUSDT"]
+    )
+
+# Risk management settings
+st.sidebar.subheader("Risk Management")
+
+# Safely get values from bot_status with defaults
+try:
+    default_position_size = bot_status.get("position_size", 10) if bot_running else 10
+    default_stop_loss = bot_status.get("stop_loss", 5) if bot_running else 5
+    default_take_profit = bot_status.get("take_profit", 10) if bot_running else 10
+    default_strategy = bot_status.get("strategy", "Smart Money Concepts") if bot_running else "Smart Money Concepts"
+except Exception as e:
+    # If there's any error, use default values
+    default_position_size = 10
+    default_stop_loss = 5
+    default_take_profit = 10
+    default_strategy = "Smart Money Concepts"
+    st.sidebar.warning(f"Using default settings: {str(e)}")
+
+position_size = st.sidebar.slider("Position Size (%)", 1, 100, default_position_size)
+stop_loss = st.sidebar.slider("Stop Loss (%)", 1, 20, default_stop_loss)
+take_profit = st.sidebar.slider("Take Profit (%)", 1, 30, default_take_profit)
+
+# Trading strategy selection
+strategy = st.sidebar.selectbox(
+    "Trading Strategy",
+    ["Smart Money Concepts", "Breakout", "Mean Reversion", "Trend Following"],
+    index=0  # Always default to Smart Money Concepts (first option)
+)
+
+# Add the start/stop bot button
+if bot_running:
+    if st.sidebar.button("STOP TRADING BOT", type="primary"):
+        try:
+            trading_bot.stop_bot()
+            st.sidebar.success("Trading bot stopped")
+            time.sleep(1)  # Brief pause to let the bot stop
+            st.rerun()
+        except Exception as e:
+            st.sidebar.error(f"Error stopping trading bot: {e}")
+else:
+    if st.sidebar.button("START TRADING BOT", type="primary"):
+        try:
+            trading_bot.start_bot(
+                strategy=strategy,
+                position_size=position_size,
+                stop_loss=stop_loss,
+                take_profit=take_profit,
+                symbols=trading_symbols,
+                timeframe=timeframe
+            )
+            st.sidebar.success("Trading bot started")
+            time.sleep(1)  # Brief pause to let the bot start
+            st.rerun()
+        except Exception as e:
+            st.sidebar.error(f"Error starting trading bot: {e}")
+
+# Function to fetch data from Binance
+@st.cache_data(ttl=60)
+def fetch_market_data(symbol, timeframe, limit):
+    if not BINANCE_AVAILABLE:
+        # Return sample data if Binance is not available
+        return generate_sample_data(limit, timeframe, symbol)
+    
+    try:
+        # Initialize client
+        client = StandaloneClient(key.key, key.secret)
+        
+        # Calculate start time based on timeframe
+        # For daily and above, we need a much longer lookback
+        timeframe_multipliers = {
+            '1m': 60,         # 1 minute in seconds
+            '3m': 60 * 3,     # 3 minutes in seconds
+            '5m': 60 * 5,     # 5 minutes in seconds
+            '15m': 60 * 15,   # 15 minutes in seconds
+            '30m': 60 * 30,   # 30 minutes in seconds
+            '1h': 60 * 60,    # 1 hour in seconds
+            '2h': 60 * 60 * 2, # 2 hours in seconds
+            '4h': 60 * 60 * 4, # 4 hours in seconds
+            '6h': 60 * 60 * 6, # 6 hours in seconds
+            '8h': 60 * 60 * 8, # 8 hours in seconds
+            '12h': 60 * 60 * 12, # 12 hours in seconds
+            '1d': 60 * 60 * 24, # 1 day in seconds
+            '3d': 60 * 60 * 24 * 3, # 3 days in seconds
+            '1w': 60 * 60 * 24 * 7, # 1 week in seconds
+            '1M': 60 * 60 * 24 * 30, # 1 month (approx) in seconds
+        }
+        
+        # Get the multiplier for the selected timeframe (default to 60 if not found)
+        multiplier = timeframe_multipliers.get(timeframe, 60)
+        
+        # Calculate start time: current time - (interval duration * number of candles)
+        start = int((time.time() - (multiplier * limit) - multiplier * 2) * 1000)
+        
+        st.info(f"Fetching {limit} {timeframe} candles from Binance API for {symbol}...")
+        
+        klines = client.client.get_historical_klines(
+            symbol=symbol,
+            interval=timeframe,
+            start_str=str(start)
+        )
+        
+        # Convert to DataFrame
+        df = pd.DataFrame(klines, columns=[
+            'timestamp', 'open', 'high', 'low', 'close', 'volume',
+            'close_time', 'quote_asset_volume', 'number_of_trades',
+            'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
+        ])
+        
+        # If we got no data, try a longer timespan for higher timeframes
+        if len(df) == 0 and timeframe in ['1d', '3d', '1w', '1M']:
+            st.warning(f"No data returned for {timeframe} timeframe. Trying with a longer lookback period...")
+            # For daily and higher timeframes, look much further back
+            start = int((time.time() - (multiplier * limit * 10)) * 1000)  # 10x longer lookback
+            
+            klines = client.client.get_historical_klines(
+                symbol=symbol,
+                interval=timeframe,
+                start_str=str(start)
+            )
+            
+        df = pd.DataFrame(klines, columns=[
+            'timestamp', 'open', 'high', 'low', 'close', 'volume',
+            'close_time', 'quote_asset_volume', 'number_of_trades',
+            'taker_buy_base_asset_volume', 'taker_buy_quote_asset_volume', 'ignore'
+        ])
+        
+        # Convert types
+        if len(df) > 0:
+        for col in ['open', 'high', 'low', 'close', 'volume']:
+            df[col] = pd.to_numeric(df[col])
+        
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            
+            # Ensure we limit to the requested number of candles
+            if len(df) > limit:
+                df = df.tail(limit)
+                
+        return df
+        else:
+            st.error(f"No data available for {symbol} on {timeframe} timeframe")
+            return generate_sample_data(limit, timeframe, symbol)
+            
+    except Exception as e:
+        st.error(f"Error fetching data: {e}")
+        # Log more detailed error information
+        if hasattr(e, 'response') and hasattr(e.response, 'text'):
+            st.error(f"API Response: {e.response.text}")
+        elif hasattr(e, 'status_code'):
+            st.error(f"Status Code: {e.status_code}")
+        
+        import traceback
+        st.error(f"Traceback: {traceback.format_exc()}")
+        
+        # Return sample data as fallback
+        return generate_sample_data(limit, timeframe, symbol)
+
+def generate_sample_data(limit, timeframe='1h', symbol='BTCUSDT'):
+    """Generate sample data for demonstration when Binance is not available or API fails"""
+    np.random.seed(42)  # For reproducibility
+    
+    # Set base prices for different assets to current market values
+    base_prices = {
+        'BTCUSDT': 86000.0,
+        'ETHUSDT': 2100.0,
+        'XRPUSDT': 0.65,
+        'ADAUSDT': 0.70,
+        'SOLUSDT': 145.0,
+        'DOTUSDT': 9.5,
+    }
+    
+    # Use default BTC price if symbol not specified
+    base_price = base_prices.get(symbol, 86000.0)
+    
+    # Generate timestamps based on timeframe
+    now = datetime.now()
+    
+    if timeframe == '1d':
+        # For daily, go back by days
+        timestamps = [now - timedelta(days=i) for i in range(limit, 0, -1)]
+        volatility_factor = 500  # Higher volatility for daily
+    elif timeframe == '1w':
+        # For weekly, go back by weeks
+        timestamps = [now - timedelta(weeks=i) for i in range(limit, 0, -1)]
+        volatility_factor = 1000  # Even higher for weekly
+    elif timeframe == '1M':
+        # For monthly, go back by months (approximate)
+        timestamps = [now - timedelta(days=i*30) for i in range(limit, 0, -1)]
+        volatility_factor = 2000  # Very high for monthly
+    else:
+        # Default to hourly or lower
+        # Convert timeframe to minutes
+        minutes_map = {
+            '1m': 1,
+            '3m': 3,
+            '5m': 5,
+            '15m': 15,
+            '30m': 30,
+            '1h': 60,
+            '2h': 120,
+            '4h': 240,
+            '6h': 360,
+            '8h': 480,
+            '12h': 720
+        }
+        minutes = minutes_map.get(timeframe, 60)  # Default to 1h if unknown
+        timestamps = [now - timedelta(minutes=i*minutes) for i in range(limit, 0, -1)]
+        volatility_factor = 50 * (minutes / 60)  # Scale volatility with timeframe
+    
+    # Generate price movements with some trend and volatility
+    price_changes = np.random.normal(0, 1, limit) * volatility_factor
+    
+    # Add a trend component
+    trend = np.linspace(0, base_price * 0.05, limit) * np.sin(np.linspace(0, np.pi * 2, limit))
+    
+    # Combine random changes and trend
+    changes = price_changes + trend
+    
+    # Calculate prices
+    prices = [base_price]
+    for i in range(1, limit):
+        # Ensure no negative prices
+        new_price = max(prices[-1] + changes[i], prices[-1] * 0.7)
+        prices.append(new_price)
+    
+    # Generate OHLC data with some intracandle movement
+    data = []
+    for i in range(limit):
+        # Base price for this candle
+        base = prices[i]
+        
+        # Generate some intracandle volatility
+        volatility = base * 0.01 * (1 + np.random.random()) * (volatility_factor / 100)
+        
+        # OHLC with some movement
+        open_price = base
+        high_price = base + volatility * np.random.random()
+        low_price = base - volatility * np.random.random()
+        close_price = base + volatility * (np.random.random() - 0.5)
+        
+        # Ensure high is highest and low is lowest
+        high_price = max(high_price, open_price, close_price)
+        low_price = min(low_price, open_price, close_price)
+        
+        # Generate volume
+        volume = base * np.random.random() * 10
+        
+        data.append([timestamps[i], open_price, high_price, low_price, close_price, volume])
+    
+    # Convert to DataFrame
+    df = pd.DataFrame(data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    
+    return df
+
+def to_candle_list(data):
+    """Convert raw data to Candle objects"""
+    candles = []
+    for i in range(len(data)):
+        row = data.iloc[i]
+        c = Candle(None)
+        c.date = i
+        c.O = float(row['open'])
+        c.H = float(row['high'])
+        c.L = float(row['low'])
+        c.C = float(row['close'])
+        c.trend()
+        candles.append(c)
+    return candles
+
+def identify_structure(candles, timeframe='1h'):
+    """
+    Identify market structure from candles according to ICT principles.
+    
+    This function implements ICT (Inner Circle Trader) market structure analysis:
+    - Hierarchical structure detection (STH/STL → IH/IL → LTH/LTL)
+    - Short-Term Highs/Lows: Micro swings (liquidity points)
+    - Intermediate Highs/Lows: Internal structure (liquidity pools)
+    - Long-Term Highs/Lows: Major market structure (trend direction)
+    - Proper Break of Structure (BOS) detection based on ICT rules
+    - Change of Character (CHoCH) recognition
+    - Filtering of liquidity sweeps and false breakouts
+    """
+    # Setup timeframe-specific parameters - adjust lookback based on timeframe
+    if timeframe in ['1d', '4h', 'D', '4H', 'daily', '1w', '1M']:
+        # Higher timeframe parameters
+        is_htf = True
+        st_lookback = 4     # Short-Term lookback (3-5 candles)
+        im_lookback = 8     # Intermediate lookback (5-10 candles)
+        lt_lookback = 15    # Long-Term lookback (10-20 candles)
+        confirmation_bars = 2  # Candles needed to confirm structure
+        # Minimum price movement required (percent)
+        min_energy_pct = 1.5  # Require stronger moves on higher timeframes
+    else:
+        # Lower timeframe parameters
+        is_htf = False
+        st_lookback = 3     # Short-Term lookback (2-3 candles)
+        im_lookback = 5     # Intermediate lookback (3-5 candles)
+        lt_lookback = 8     # Long-Term lookback (5-10 candles)
+        confirmation_bars = 1  # Candles needed to confirm
+        # Minimum price movement required (percent)
+        min_energy_pct = 0.8  # Smaller moves can be significant on lower timeframes
+
+    # Identify trend blocks (sequences of bullish or bearish candles)
+    blocks = []
+    current_block = []
+    last_trend = None
+    
+    for candle in candles:
+        current_trend = candle.trend()
+        if last_trend is None or current_trend == last_trend:
+            current_block.append(candle)
+        else:
+            if current_block:  # Only append if not empty
+                blocks.append(current_block)
+            current_block = [candle]
+        last_trend = current_trend
+    
+    if current_block:
+        blocks.append(current_block)
+    
+    # We need enough candles to properly identify structure
+    if len(candles) < (lt_lookback * 2 + 1):
+        # If not enough data for full analysis, use minimum lookback
+        min_lookback = st_lookback
+        if len(candles) < (min_lookback * 2 + 1):
+            return blocks, [], []  # Not enough data for reliable swing detection
+    
+    # Dictionary to store all potential swing points by type
+    potential_swings = {
+        'STH': [],  # Short-Term High
+        'STL': [],  # Short-Term Low
+        'IH': [],   # Intermediate High
+        'IL': [],   # Intermediate Low
+        'LTH': [],  # Long-Term High
+        'LTL': []   # Long-Term Low
+    }
+    
+    # STEP 1: Identify Short-Term Highs and Lows (base level structure)
+    # STH must have at least 2 lower highs on both sides and show significant price movement
+    # STL must have at least 2 higher lows on both sides and show significant price movement
+    
+    # Track processed points to avoid duplicates
+    processed_dates = set()
+    
+    for i in range(st_lookback, len(candles) - st_lookback):
+        # Skip if too close to previously detected point (to avoid clustering)
+        if i > 0 and candles[i].date in processed_dates:
+            continue
+            
+        # Check for Short-Term High (STH)
+        is_sth = True
+        lower_high_count_left = 0
+        lower_high_count_right = 0
+        
+        for j in range(1, st_lookback + 1):
+            # Count lower highs to the left
+            if candles[i].H > candles[i - j].H:
+                lower_high_count_left += 1
+            # Count lower highs to the right
+            if candles[i].H > candles[i + j].H:
+                lower_high_count_right += 1
+        
+        # Must have at least 2 lower highs on both sides
+        if lower_high_count_left >= 2 and lower_high_count_right >= 2:
+            # Calculate energy (price movement significance)
+            if i > 0 and i < len(candles) - 1:
+                # Check the price move from previous swing high attempt
+                prev_high_idx = max(0, i - st_lookback)
+                prev_high = max(candles[j].H for j in range(prev_high_idx, i))
+                
+                # Check move to the current high
+                price_move_pct = ((candles[i].H - prev_high) / prev_high) * 100
+                
+                # Only consider significant moves with energy
+                has_energy = abs(price_move_pct) >= min_energy_pct
+                
+                if not has_energy:
+                    continue
+            
+            # Validate that the swing is respected for confirmation_bars
+            is_valid = True
+            for j in range(1, min(confirmation_bars + 1, len(candles) - i)):
+                if candles[i + j].H > candles[i].H:
+                    is_valid = False
+                    break
+            
+            if is_valid:
+                potential_swings['STH'].append((i, candles[i]))
+                processed_dates.add(candles[i].date)
+        
+        # Check for Short-Term Low (STL)
+        is_stl = True
+        higher_low_count_left = 0
+        higher_low_count_right = 0
+        
+        for j in range(1, st_lookback + 1):
+            # Count higher lows to the left
+            if candles[i].L < candles[i - j].L:
+                higher_low_count_left += 1
+            # Count higher lows to the right
+            if candles[i].L < candles[i + j].L:
+                higher_low_count_right += 1
+        
+        # Must have at least 2 higher lows on both sides
+        if higher_low_count_left >= 2 and higher_low_count_right >= 2:
+            # Calculate energy (price movement significance)
+            if i > 0 and i < len(candles) - 1:
+                # Check the price move from previous swing low attempt
+                prev_low_idx = max(0, i - st_lookback)
+                prev_low = min(candles[j].L for j in range(prev_low_idx, i))
+                
+                # Check move to the current low
+                price_move_pct = ((candles[i].L - prev_low) / prev_low) * 100
+                
+                # Only consider significant moves with energy
+                has_energy = abs(price_move_pct) >= min_energy_pct
+                
+                if not has_energy:
+                    continue
+            
+            # Validate that the swing is respected for confirmation_bars
+            is_valid = True
+            for j in range(1, min(confirmation_bars + 1, len(candles) - i)):
+                if candles[i + j].L < candles[i].L:
+                    is_valid = False
+                    break
+            
+            if is_valid:
+                potential_swings['STL'].append((i, candles[i]))
+                processed_dates.add(candles[i].date)
+    
+    # Sort ST swings by index for time-based order
+    potential_swings['STH'] = sorted(potential_swings['STH'], key=lambda x: x[0])
+    potential_swings['STL'] = sorted(potential_swings['STL'], key=lambda x: x[0])
+    
+    # STEP 2: Identify Intermediate Highs and Lows (from Short-Term swings)
+    # An IH must have one STH to the left and one to the right
+    # An IL must have one STL to the left and one to the right
+    
+    # Process STHs for potential IHs - FIXED to ensure IHs have STHs on both sides
+    for i, (idx, candle) in enumerate(potential_swings['STH']):
+        # Skip if not enough STHs or this is first/last STH
+        if len(potential_swings['STH']) < 3 or i == 0 or i == len(potential_swings['STH']) - 1:
+            continue
+        
+        # Get surrounding STHs
+        prev_idx, prev_candle = potential_swings['STH'][i-1]
+        next_idx, next_candle = potential_swings['STH'][i+1]
+        
+        # IH must be higher than both adjacent STHs
+        if candle.H > prev_candle.H and candle.H > next_candle.H:
+            # Ensure proper minimum distance between points
+            if idx - prev_idx >= im_lookback and next_idx - idx >= im_lookback:
+                # Calculate energy (significant price movement)
+                price_move_pct = ((candle.H - max(prev_candle.H, next_candle.H)) / max(prev_candle.H, next_candle.H)) * 100
+                
+                # Only mark as IH if it's a significant move (has energy)
+                if abs(price_move_pct) >= (min_energy_pct * 1.5):  # Require 1.5x more energy for IH
+                    potential_swings['IH'].append((idx, candle))
+    
+    # Process STLs for potential ILs - FIXED to ensure ILs have STLs on both sides
+    for i, (idx, candle) in enumerate(potential_swings['STL']):
+        # Skip if not enough STLs or this is first/last STL
+        if len(potential_swings['STL']) < 3 or i == 0 or i == len(potential_swings['STL']) - 1:
+            continue
+        
+        # Get surrounding STLs
+        prev_idx, prev_candle = potential_swings['STL'][i-1]
+        next_idx, next_candle = potential_swings['STL'][i+1]
+        
+        # IL must be lower than both adjacent STLs
+        if candle.L < prev_candle.L and candle.L < next_candle.L:
+            # Ensure proper minimum distance between points
+            if idx - prev_idx >= im_lookback and next_idx - idx >= im_lookback:
+                # Calculate energy (significant price movement)
+                price_move_pct = ((candle.L - min(prev_candle.L, next_candle.L)) / min(prev_candle.L, next_candle.L)) * 100
+                
+                # Only mark as IL if it's a significant move (has energy)
+                if abs(price_move_pct) >= (min_energy_pct * 1.5):  # Require 1.5x more energy for IL
+                    potential_swings['IL'].append((idx, candle))
+    
+    # Sort intermediate swings by index
+    potential_swings['IH'] = sorted(potential_swings['IH'], key=lambda x: x[0])
+    potential_swings['IL'] = sorted(potential_swings['IL'], key=lambda x: x[0])
+    
+    # STEP 3: Identify Long-Term Highs and Lows (from Intermediate swings)
+    # An LTH must have one IH to the left and one to the right
+    # An LTL must have one IL to the left and one to the right
+    
+    # Process IHs for potential LTHs
+    for i, (idx, candle) in enumerate(potential_swings['IH']):
+        # Skip if not enough IHs or this is first/last IH
+        if len(potential_swings['IH']) < 3 or i == 0 or i == len(potential_swings['IH']) - 1:
+            continue
+        
+        # Get surrounding IHs
+        prev_idx, prev_candle = potential_swings['IH'][i-1]
+        next_idx, next_candle = potential_swings['IH'][i+1]
+        
+        # LTH must be higher than both adjacent IHs
+        if candle.H > prev_candle.H and candle.H > next_candle.H:
+            # Ensure proper minimum distance between points
+            if idx - prev_idx >= lt_lookback and next_idx - idx >= lt_lookback:
+                # Calculate energy (significant price movement)
+                price_move_pct = ((candle.H - max(prev_candle.H, next_candle.H)) / max(prev_candle.H, next_candle.H)) * 100
+                
+                # Only mark as LTH if it's a significant move (has energy)
+                if abs(price_move_pct) >= (min_energy_pct * 2):  # Require 2x more energy for LTH
+                    potential_swings['LTH'].append((idx, candle))
+    
+    # Process ILs for potential LTLs
+    for i, (idx, candle) in enumerate(potential_swings['IL']):
+        # Skip if not enough ILs or this is first/last IL
+        if len(potential_swings['IL']) < 3 or i == 0 or i == len(potential_swings['IL']) - 1:
+            continue
+        
+        # Get surrounding ILs
+        prev_idx, prev_candle = potential_swings['IL'][i-1]
+        next_idx, next_candle = potential_swings['IL'][i+1]
+        
+        # LTL must be lower than both adjacent ILs
+        if candle.L < prev_candle.L and candle.L < next_candle.L:
+            # Ensure proper minimum distance between points
+            if idx - prev_idx >= lt_lookback and next_idx - idx >= lt_lookback:
+                # Calculate energy (significant price movement)
+                price_move_pct = ((candle.L - min(prev_candle.L, next_candle.L)) / min(prev_candle.L, next_candle.L)) * 100
+                
+                # Only mark as LTL if it's a significant move (has energy)
+                if abs(price_move_pct) >= (min_energy_pct * 2):  # Require 2x more energy for LTL
+                    potential_swings['LTL'].append((idx, candle))
+    
+    # Prepare swing points and vertices
+    swing_points = []
+    vertices = []
+    
+    # Process swing points based on their level (highest priority to lowest)
+    # Always include LTH/LTL - these are major structure points
+    for idx, candle in potential_swings['LTH']:
+        swing_points.append(('LTH', candle))
+        v = Vertex(candle.date, candle.H)
+        v.type = "LTH"
+        vertices.append((idx, v))
+    
+    for idx, candle in potential_swings['LTL']:
+        swing_points.append(('LTL', candle))
+        v = Vertex(candle.date, candle.L)
+        v.type = "LTL"
+        vertices.append((idx, v))
+    
+    # Add Intermediate Highs/Lows
+    for idx, candle in potential_swings['IH']:
+        # Skip if this candle is already a LTH
+        if idx in [x[0] for x in potential_swings['LTH']]:
+            continue
+        swing_points.append(('IH', candle))
+        v = Vertex(candle.date, candle.H)
+        v.type = "IH"
+        vertices.append((idx, v))
+    
+    for idx, candle in potential_swings['IL']:
+        # Skip if this candle is already a LTL
+        if idx in [x[0] for x in potential_swings['LTL']]:
+            continue
+        swing_points.append(('IL', candle))
+        v = Vertex(candle.date, candle.L)
+        v.type = "IL"
+        vertices.append((idx, v))
+    
+    # Add Short-Term Highs/Lows if we're on LTF or if we don't have enough higher-level structure
+    # Always include STH/STL in all timeframes to complete the hierarchy
+    # Add Short-Term Highs
+    for idx, candle in potential_swings['STH']:
+        # Skip if this candle is already an IH or LTH
+        if idx in [x[0] for x in potential_swings['IH']] or idx in [x[0] for x in potential_swings['LTH']]:
+            continue
+        swing_points.append(('STH', candle))
+        v = Vertex(candle.date, candle.H)
+        v.type = "STH"
+        vertices.append((idx, v))
+    
+    # Add Short-Term Lows
+    for idx, candle in potential_swings['STL']:
+        # Skip if this candle is already an IL or LTL
+        if idx in [x[0] for x in potential_swings['IL']] or idx in [x[0] for x in potential_swings['LTL']]:
+            continue
+        swing_points.append(('STL', candle))
+        v = Vertex(candle.date, candle.L)
+        v.type = "STL"
+        vertices.append((idx, v))
+    
+    # Sort vertices chronologically by index
+    vertices.sort(key=lambda x: x[0])
+    vertices = [v for _, v in vertices]
+    
+    # Connect vertices and identify BOS and CHoCH
+    for i in range(1, len(vertices)):
+        vertices[i].set_last(vertices[i-1])
+        vertices[i-1].set_next(vertices[i])
+        
+        # Check for BOS (Break of Structure) - only valid on LTH/LTL (major structure)
+        if vertices[i].type == "LTH" and vertices[i-1].type == "LTH" and vertices[i].y > vertices[i-1].y:
+            # Bullish BOS (higher LTH) - this is a confirmed trend change
+            vertices[i].breaks = True
+        elif vertices[i].type == "LTL" and vertices[i-1].type == "LTL" and vertices[i].y < vertices[i-1].y:
+            # Bearish BOS (lower LTL) - this is a confirmed trend change
+            vertices[i].breaks = True
+        
+        # Check for Internal BOS (on IH/IL) - this is a minor structure break
+        elif vertices[i].type == "IH" and vertices[i-1].type == "IH" and vertices[i].y > vertices[i-1].y:
+            # Internal bullish BOS - potential trend continuation
+            vertices[i].breaks_minor = True
+        elif vertices[i].type == "IL" and vertices[i-1].type == "IL" and vertices[i].y < vertices[i-1].y:
+            # Internal bearish BOS - potential trend continuation
+            vertices[i].breaks_minor = True
+        
+        # Check for CHoCH (Change of Character)
+        # CHoCH occurs when there's a potential shift in behavior
+        elif ((vertices[i].type in ["LTH", "IH"] and vertices[i-1].type in ["LTL", "IL"]) or
+              (vertices[i].type in ["LTL", "IL"] and vertices[i-1].type in ["LTH", "IH"])):
+            vertices[i].is_choch = True
+        
+        # Check for liquidity sweeps/grabs (relevant for STH/STL)
+        elif vertices[i].type == "STH" and vertices[i-1].type == "STL":
+            # Check if this is a quick sweep of the previous STL without follow-through
+            # This happens when price quickly moves up but doesn't establish a strong trend
+            if i+1 < len(vertices) and vertices[i+1].type == "STL":
+                vertices[i].is_liquidity_sweep = True
+        elif vertices[i].type == "STL" and vertices[i-1].type == "STH":
+            # Check if this is a quick sweep of the previous STH without follow-through
+            if i+1 < len(vertices) and vertices[i+1].type == "STH":
+                vertices[i].is_liquidity_sweep = True
+    
+    # Identify first and last vertices
+    if vertices:
+        vertices[0].is_first = True
+        vertices[-1].is_last = True
+    
+    return blocks, swing_points, vertices
+
+def plot_market_structure(candles, blocks, swing_points):
+    """
+    Plot the market structure with matplotlib according to ICT principles.
+    
+    This function creates a visualization of the market structure with:
+    - Color-coded structure levels (Blue for LTH/LTL, Yellow for IH/IL, Green for STH, Red for STL)
+    - Different marker sizes to highlight the hierarchy
+    - Line styles to distinguish trend direction (solid for bullish/bearish, dashed for ranging)
+    - Clear annotations for each structure point
+    """
+    fig, ax = plt.subplots(figsize=(12, 6))
+    
+    # Plot candles
+    dates = range(len(candles))
+    
+    # Calculate width for candlesticks
+    width = 0.6
+    
+    # Plot up and down candles separately for color
+    up_candles = [c for c in candles if c.C >= c.O]
+    down_candles = [c for c in candles if c.C < c.O]
+    
+    # Plot up candles
+    for c in up_candles:
+        ax.plot([c.date, c.date], [c.L, c.H], color='green', linewidth=1)
+        ax.bar(c.date, c.C - c.O, width, bottom=c.O, color='green', alpha=0.5)
+    
+    # Plot down candles
+    for c in down_candles:
+        ax.plot([c.date, c.date], [c.L, c.H], color='red', linewidth=1)
+        ax.bar(c.date, c.C - c.O, width, bottom=c.O, color='red', alpha=0.5)
+    
+    # First, organize swing points for filtering out duplicates
+    # Group by type and find highest/lowest value for each date
+    swing_points_by_date = {}
+    
+    for type_point, point in swing_points:
+        date_key = point.date
+        value = point.H if type_point in ['LTH', 'IH', 'STH'] else point.L
+        
+        # Initialize if date not in dict
+        if date_key not in swing_points_by_date:
+            swing_points_by_date[date_key] = {}
+        
+        # For STH, keep only the highest at a specific date
+        if type_point == 'STH':
+            if 'STH' not in swing_points_by_date[date_key] or value > swing_points_by_date[date_key]['STH'][1]:
+                swing_points_by_date[date_key]['STH'] = (point, value)
+        # For STL, keep only the lowest at a specific date
+        elif type_point == 'STL':
+            if 'STL' not in swing_points_by_date[date_key] or value < swing_points_by_date[date_key]['STL'][1]:
+                swing_points_by_date[date_key]['STL'] = (point, value)
+        # For other types, just store them directly
+        else:
+            if type_point not in swing_points_by_date[date_key]:
+                swing_points_by_date[date_key][type_point] = (point, value)
+    
+    # Now plot each swing point with better filtering
+    plotted_points = set()  # Track which points we've already plotted
+    
+    # Plot in order of hierarchy (LTH/LTL first, then IH/IL, then STH/STL)
+    # This ensures that higher priority structures appear on top
+    
+    # First, plot Long-Term Highs/Lows (LTH/LTL)
+    for date_key, points_dict in swing_points_by_date.items():
+        for type_point in ['LTH', 'LTL']:
+            if type_point in points_dict:
+                point, value = points_dict[type_point]
+                
+                # Create a unique key for this point to avoid duplicates
+                point_key = (date_key, type_point, value)
+                
+                if point_key in plotted_points:
+                    continue  # Skip if already plotted
+                    
+                plotted_points.add(point_key)
+                
+                if type_point == 'LTH':  # Long-Term High
+                    color = 'blue'  # Blue for major structure
+                    marker = '^'  # Triangle up
+                    size = 120
+                    value = point.H
+                    label = 'LTH'
+                else:  # LTL - Long-Term Low
+                    color = 'blue'  # Blue for major structure
+                    marker = 'v'  # Triangle down
+                    size = 120
+                    value = point.L
+                    label = 'LTL'
+                
+                ax.scatter(point.date, value, color=color, s=size, marker=marker, zorder=12)
+                ax.annotate(label, (point.date, value), xytext=(5, 5), 
+                   textcoords='offset points', color=color, fontweight='bold')
+    
+    # Second, plot Intermediate Highs/Lows (IH/IL)
+    for date_key, points_dict in swing_points_by_date.items():
+        for type_point in ['IH', 'IL']:
+            if type_point in points_dict:
+                point, value = points_dict[type_point]
+                
+                # Create a unique key for this point to avoid duplicates
+                point_key = (date_key, type_point, value)
+                
+                if point_key in plotted_points:
+                    continue  # Skip if already plotted
+                    
+                plotted_points.add(point_key)
+                
+                if type_point == 'IH':  # Intermediate High
+                    color = 'gold'  # Yellow for intermediate structure
+                    marker = '^'  # Triangle up
+                    size = 90
+                    value = point.H
+                    label = 'IH'
+                else:  # IL - Intermediate Low
+                    color = 'gold'  # Yellow for intermediate structure
+                    marker = 'v'  # Triangle down
+                    size = 90
+                    value = point.L
+                    label = 'IL'
+                
+                ax.scatter(point.date, value, color=color, s=size, marker=marker, zorder=11)
+                ax.annotate(label, (point.date, value), xytext=(5, 5), 
+                          textcoords='offset points', color=color, fontweight='bold')
+    
+    # Finally, plot Short-Term Highs/Lows (STH/STL)
+    for date_key, points_dict in swing_points_by_date.items():
+        for type_point in ['STH', 'STL']:
+            if type_point in points_dict:
+                point, value = points_dict[type_point]
+                
+                # Create a unique key for this point to avoid duplicates
+                point_key = (date_key, type_point, value)
+                
+                if point_key in plotted_points:
+                    continue  # Skip if already plotted
+                    
+                plotted_points.add(point_key)
+                
+                if type_point == 'STH':  # Short-Term High
+                    color = 'green'  # Green for Short-Term Highs
+                    marker = '^'  # Triangle up
+                    size = 60
+                    value = point.H
+                    label = 'STH'
+                else:  # STL - Short-Term Low
+                    color = 'red'  # Red for Short-Term Lows
+                    marker = 'v'  # Triangle down
+                    size = 60
+                    value = point.L
+                    label = 'STL'
+                
+                ax.scatter(point.date, value, color=color, s=size, marker=marker, zorder=10)
+                ax.annotate(label, (point.date, value), xytext=(5, 5), 
+                          textcoords='offset points', color=color, fontweight='bold')
+    
+    # Connect swing points with lines for different structure levels
+    # Extract points for each type with minimal duplication
+    lth_points = []
+    ltl_points = []
+    ih_points = []
+    il_points = []
+    sth_points = []
+    stl_points = []
+    
+    # Use the filtered points from the plotting logic
+    for date_key, points_dict in swing_points_by_date.items():
+        if 'LTH' in points_dict:
+            point, _ = points_dict['LTH']
+            lth_points.append((point.date, point.H))
+        if 'LTL' in points_dict:
+            point, _ = points_dict['LTL']
+            ltl_points.append((point.date, point.L))
+        if 'IH' in points_dict:
+            point, _ = points_dict['IH']
+            ih_points.append((point.date, point.H))
+        if 'IL' in points_dict:
+            point, _ = points_dict['IL']
+            il_points.append((point.date, point.L))
+        if 'STH' in points_dict:
+            point, _ = points_dict['STH']
+            sth_points.append((point.date, point.H))
+        if 'STL' in points_dict:
+            point, _ = points_dict['STL']
+            stl_points.append((point.date, point.L))
+    
+    # Sort all points by date
+    lth_points.sort(key=lambda x: x[0])
+    ltl_points.sort(key=lambda x: x[0])
+    ih_points.sort(key=lambda x: x[0])
+    il_points.sort(key=lambda x: x[0])
+    sth_points.sort(key=lambda x: x[0])
+    stl_points.sort(key=lambda x: x[0])
+    
+    # Connect Long-Term Highs with thicker blue lines
+    if len(lth_points) >= 2:
+        for i in range(1, len(lth_points)):
+            # Check if this is a higher high (bullish LT structure)
+            if lth_points[i][1] > lth_points[i-1][1]:
+                line_style = '-'  # Solid line for bullish structure
+                line_width = 2.5
+            else:
+                line_style = '--'  # Dashed line for bearish structure
+                line_width = 1.5
+                
+            ax.plot([lth_points[i-1][0], lth_points[i][0]], 
+                   [lth_points[i-1][1], lth_points[i][1]], 
+                   color='blue', linestyle=line_style, alpha=0.9, linewidth=line_width, zorder=7)
+    
+    # Connect Long-Term Lows with thicker blue lines
+    if len(ltl_points) >= 2:
+        for i in range(1, len(ltl_points)):
+            # Check if this is a lower low (bearish LT structure)
+            if ltl_points[i][1] < ltl_points[i-1][1]:
+                line_style = '-'  # Solid line for bearish structure
+                line_width = 2.5
+            else:
+                line_style = '--'  # Dashed line for bullish structure
+                line_width = 1.5
+                
+            ax.plot([ltl_points[i-1][0], ltl_points[i][0]], 
+                   [ltl_points[i-1][1], ltl_points[i][1]], 
+                   color='blue', linestyle=line_style, alpha=0.9, linewidth=line_width, zorder=7)
+    
+    # Connect Intermediate Highs with medium yellow lines
+    if len(ih_points) >= 2:
+        for i in range(1, len(ih_points)):
+            # Check if this is a higher high (bullish structure)
+            if ih_points[i][1] > ih_points[i-1][1]:
+                line_style = '-'  # Solid line
+                line_width = 1.8
+            else:
+                line_style = '--'  # Dashed line
+                line_width = 1.2
+                
+            ax.plot([ih_points[i-1][0], ih_points[i][0]], 
+                   [ih_points[i-1][1], ih_points[i][1]], 
+                   color='gold', linestyle=line_style, alpha=0.7, linewidth=line_width, zorder=6)
+    
+    # Connect Intermediate Lows with medium yellow lines
+    if len(il_points) >= 2:
+        for i in range(1, len(il_points)):
+            # Check if this is a lower low (bearish structure)
+            if il_points[i][1] < il_points[i-1][1]:
+                line_style = '-'  # Solid line
+                line_width = 1.8
+            else:
+                line_style = '--'  # Dashed line
+                line_width = 1.2
+                
+            ax.plot([il_points[i-1][0], il_points[i][0]], 
+                   [il_points[i-1][1], il_points[i][1]], 
+                   color='gold', linestyle=line_style, alpha=0.7, linewidth=line_width, zorder=6)
+    
+    # Connect Short-Term Highs with thin green lines
+    if len(sth_points) >= 2:
+        for i in range(1, len(sth_points)):
+            # Check if moving higher or lower
+            if sth_points[i][1] > sth_points[i-1][1]:
+                line_style = '-'  # Solid line
+                line_width = 1.0
+            else:
+                line_style = '--'  # Dashed line
+                line_width = 0.8
+                
+            ax.plot([sth_points[i-1][0], sth_points[i][0]], 
+                   [sth_points[i-1][1], sth_points[i][1]], 
+                   color='green', linestyle=line_style, alpha=0.5, linewidth=line_width, zorder=5)
+    
+    # Connect Short-Term Lows with thin red lines
+    if len(stl_points) >= 2:
+        for i in range(1, len(stl_points)):
+            # Check if moving higher or lower
+            if stl_points[i][1] < stl_points[i-1][1]:
+                line_style = '-'  # Solid line
+                line_width = 1.0
+            else:
+                line_style = '--'  # Dashed line
+                line_width = 0.8
+                
+            ax.plot([stl_points[i-1][0], stl_points[i][0]], 
+                   [stl_points[i-1][1], stl_points[i][1]], 
+                   color='red', linestyle=line_style, alpha=0.5, linewidth=line_width, zorder=5)
+    
+    # Add grid and labels
+    ax.grid(True, alpha=0.3)
+    ax.set_xlabel('Candle Index')
+    ax.set_ylabel('Price')
+    ax.set_title(f'Market Structure Analysis with ICT Principles')
+    
+    # Add legend with color-coded structure levels
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Line2D([0], [0], marker='^', color='blue', lw=2.5, 
+               markerfacecolor='blue', markersize=10, 
+               label='Long-Term High (LTH)'),
+        Line2D([0], [0], marker='v', color='blue', lw=2.5, 
+               markerfacecolor='blue', markersize=10, 
+               label='Long-Term Low (LTL)'),
+        Line2D([0], [0], marker='^', color='gold', lw=1.8, 
+               markerfacecolor='gold', markersize=8, 
+               label='Intermediate High (IH)'),
+        Line2D([0], [0], marker='v', color='gold', lw=1.8, 
+               markerfacecolor='gold', markersize=8, 
+               label='Intermediate Low (IL)'),
+        Line2D([0], [0], marker='^', color='green', lw=1.0, 
+               markerfacecolor='green', markersize=6, 
+               label='Short-Term High (STH)'),
+        Line2D([0], [0], marker='v', color='red', lw=1.0, 
+               markerfacecolor='red', markersize=6, 
+               label='Short-Term Low (STL)'),
+        Line2D([0], [0], color='blue', lw=2.5, linestyle='-',
+               label='Bullish/Bearish Major Structure'),
+        Line2D([0], [0], color='blue', lw=1.5, linestyle='--',
+               label='Countertrend Major Structure'),
+    ]
+    ax.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1.01, 1))
+    
+    # Adjust the layout to make room for the legend
+    plt.tight_layout()
+    plt.subplots_adjust(right=0.8)
+    
+    return fig
+
+def analyze_market_structure(vertices):
+    """
+    Analyze the market structure based on ICT principles.
+    
+    This function examines the identified structure points (LTH/LTL, IH/IL, STH/STL)
+    and determines the market trend and potential trading opportunities according to
+    ICT (Inner Circle Trader) concepts:
+    
+    - BOS (Break of Structure): Confirmed only when LTH/LTL is broken
+    - CHoCH (Change of Character): Potential reversal when IH/IL is broken
+    - Liquidity Sweeps: When STH/STL is quickly broken but price doesn't hold
+    
+    Returns a string indicating the current market trend and potential trade setups.
+    """
+    if not vertices:
+        return "Insufficient data"
+    
+    # Count different vertex types
+    lth_count = sum(1 for v in vertices if v.type == "LTH")
+    ltl_count = sum(1 for v in vertices if v.type == "LTL")
+    ih_count = sum(1 for v in vertices if v.type == "IH")
+    il_count = sum(1 for v in vertices if v.type == "IL")
+    sth_count = sum(1 for v in vertices if v.type == "STH")
+    stl_count = sum(1 for v in vertices if v.type == "STL")
+    
+    # Check for actual BOS and CHoCH events
+    bos_bullish = any(v.breaks and v.type == "LTH" for v in vertices)
+    bos_bearish = any(v.breaks and v.type == "LTL" for v in vertices)
+    choch_up = any(v.is_choch and v.type in ["IH", "LTH"] for v in vertices)
+    choch_down = any(v.is_choch and v.type in ["IL", "LTL"] for v in vertices)
+    liquidity_sweeps = any(v.is_liquidity_sweep for v in vertices)
+    
+    # ANALYSIS HIERARCHY:
+    # 1. First check for confirmed BOS (major trend change)
+    # 2. If no BOS, check for CHoCH (potential trend shift)
+    # 3. If no CHoCH, analyze structure counts
+    
+    # Step 1: Check for confirmed Break of Structure (major trend change)
+    if bos_bullish:
+        return "BULLISH BREAK OF STRUCTURE - Major uptrend confirmed"
+    elif bos_bearish:
+        return "BEARISH BREAK OF STRUCTURE - Major downtrend confirmed"
+    
+    # Step 2: Check for Change of Character (potential trend shift)
+    if choch_up and choch_down:
+        return "CHOPPY MARKET - Multiple CHoCH signals, no clear direction"
+    elif choch_up:
+        return "POTENTIAL BULLISH SHIFT - CHoCH detected, watch for BOS confirmation"
+    elif choch_down:
+        return "POTENTIAL BEARISH SHIFT - CHoCH detected, watch for BOS confirmation"
+    
+    # Step 3: Analyze Long-Term structure first if available
+    if lth_count > 0 or ltl_count > 0:
+        if lth_count > ltl_count:
+            # Check if we have higher LTHs (bullish structure)
+            lth_vertices = [v for v in vertices if v.type == "LTH"]
+            if len(lth_vertices) >= 2:
+                # Check sequence of LTHs
+                is_higher_lths = all(lth_vertices[i].y > lth_vertices[i-1].y for i in range(1, len(lth_vertices)))
+                if is_higher_lths:
+                    return "STRONG UPTREND - Higher LTHs forming"
+    else:
+                    return "WEAKENING UPTREND - LTHs not making higher highs"
+            return "BULLISH BIAS - More LTHs than LTLs"
+            
+        elif ltl_count > lth_count:
+            # Check if we have lower LTLs (bearish structure)
+            ltl_vertices = [v for v in vertices if v.type == "LTL"]
+            if len(ltl_vertices) >= 2:
+                # Check sequence of LTLs
+                is_lower_ltls = all(ltl_vertices[i].y < ltl_vertices[i-1].y for i in range(1, len(ltl_vertices)))
+                if is_lower_ltls:
+                    return "STRONG DOWNTREND - Lower LTLs forming"
+                else:
+                    return "WEAKENING DOWNTREND - LTLs not making lower lows"
+            return "BEARISH BIAS - More LTLs than LTHs"
+            
+        else:  # Equal long-term structure count
+            # Check Intermediate Structure
+            if ih_count > il_count:
+                return "CHOPPY UPTREND - Equal LTH/LTL but more IHs than ILs"
+            elif il_count > ih_count:
+                return "CHOPPY DOWNTREND - Equal LTH/LTL but more ILs than IHs"
+            else:
+                # Check for liquidity sweeps
+                if liquidity_sweeps:
+                    return "RANGING MARKET WITH LIQUIDITY SWEEPS - Expect stop hunts"
+                else:
+                    return "RANGING MARKET - No clear trend direction"
+    
+    # Step 4: If no Long-Term structure, check Intermediate Structure
+    elif ih_count > 0 or il_count > 0:
+        if ih_count > il_count:
+            # Check for internal breaks
+            has_internal_breaks = any(v.breaks_minor and v.type == "IH" for v in vertices)
+            if has_internal_breaks:
+                return "INTERNAL UPTREND - Higher IHs with internal BOS"
+            return "DEVELOPING UPTREND - More IHs than ILs but no internal BOS yet"
+            
+        elif il_count > ih_count:
+            # Check for internal breaks
+            has_internal_breaks = any(v.breaks_minor and v.type == "IL" for v in vertices)
+            if has_internal_breaks:
+                return "INTERNAL DOWNTREND - Lower ILs with internal BOS"
+            return "DEVELOPING DOWNTREND - More ILs than IHs but no internal BOS yet"
+            
+        else:  # Equal intermediate structure count
+            # Check for liquidity sweeps
+            if liquidity_sweeps:
+                return "CONSOLIDATION WITH LIQUIDITY SWEEPS - Watch for breakouts"
+            else:
+                return "CONSOLIDATION - Prepare for breakout"
+    
+    # Step 5: If only Short-Term structure is available
+    elif sth_count > 0 or stl_count > 0:
+        if sth_count > stl_count:
+            if liquidity_sweeps:
+                return "SHORT-TERM BULLISH WITH STOP HUNTS - Micro-bullish structure, watch for fake moves"
+            return "SHORT-TERM BULLISH - Micro-bullish structure but insufficient confirmation"
+            
+        elif stl_count > sth_count:
+            if liquidity_sweeps:
+                return "SHORT-TERM BEARISH WITH STOP HUNTS - Micro-bearish structure, watch for fake moves"
+            return "SHORT-TERM BEARISH - Micro-bearish structure but insufficient confirmation"
+            
+        else:
+            return "MICRO RANGING - Insufficient structure to determine trend"
+    
+    else:
+        return "NO CLEAR STRUCTURE - Insufficient data points"
+
+# Main app
+if __name__ == "__main__" or 'streamlit' in sys.modules:
+    with st.spinner('Fetching market data...'):
+        data = fetch_market_data(symbol, timeframe, candle_count)
+    
+    if not data.empty:
+        # Analysis tab
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["Market Structure", "Trading Dashboard", "ICT Strategy", "Raw Data", "About"])
+        
+        with tab1:
+            # Convert data to candles
+            candles = to_candle_list(data)
+            
+            # Analyze market structure
+            blocks, swing_points, vertices = identify_structure(candles, timeframe)
+            
+            # Plot the results
+            fig = plot_market_structure(candles, blocks, swing_points)
+            st.pyplot(fig)
+            
+            # Market insights
+            st.subheader("Market Insights")
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                hh_count = sum(1 for p in swing_points if p[0] == 'HH')
+                ll_count = sum(1 for p in swing_points if p[0] == 'LL')
+                st.metric("Higher Highs", hh_count)
+                st.metric("Lower Lows", ll_count)
+            
+            with col2:
+                lth_count = sum(1 for p in swing_points if p[0] == 'LTH')
+                ltl_count = sum(1 for p in swing_points if p[0] == 'LTL')
+                st.metric("Long-Term Highs", lth_count)
+                st.metric("Long-Term Lows", ltl_count)
+                
+            with col3:
+                ih_count = sum(1 for p in swing_points if p[0] == 'IH')
+                il_count = sum(1 for p in swing_points if p[0] == 'IL')
+                st.metric("Intermediate Highs", ih_count)
+                st.metric("Intermediate Lows", il_count)
+                
+            # Market structure analysis
+            analysis = analyze_market_structure(vertices)
+            st.info(f"**Market Structure Analysis**: {analysis}")
+            
+            # Position sizing calculator
+            with st.expander("Position Size Calculator"):
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    account_size = st.number_input("Account Size (USD)", value=10000.0, min_value=100.0)
+                    risk_percent = st.slider("Risk %", min_value=0.1, max_value=5.0, value=1.0, step=0.1)
+                
+                with col2:
+                    entry_price = st.number_input("Entry Price", value=float(data["close"].iloc[-1]), min_value=0.1)
+                    stop_price = st.number_input("Stop Loss Price", value=float(data["close"].iloc[-1] * 0.95), min_value=0.1)
+            
+            with col3:
+                    risk_reward = st.slider("Risk:Reward", min_value=1.0, max_value=5.0, value=2.0, step=0.1)
+                    
+                # Calculate position size
+                risk_amount = account_size * (risk_percent / 100)
+                price_diff = abs(entry_price - stop_price)
+                position_size = risk_amount / price_diff
+                position_value = position_size * entry_price
+                
+                # Calculate take profit
+                if entry_price > stop_price:  # Long position
+                    take_profit = entry_price + (entry_price - stop_price) * risk_reward
+                else:  # Short position
+                    take_profit = entry_price - (stop_price - entry_price) * risk_reward
+                
+                st.markdown(f"**Position Size**: {position_size:.6f} {symbol.replace('USDT', '')}")
+                st.markdown(f"**Position Value**: ${position_value:.2f}")
+                st.markdown(f"**Risk Amount**: ${risk_amount:.2f}")
+                st.markdown(f"**Take Profit Target**: ${take_profit:.2f}")
+        
+        with tab2:
+            # Simple trading dashboard
+            st.subheader("Trading Dashboard")
+            
+            # Trading bot controls
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                use_ict = st.checkbox("Use ICT Strategy", value=True, help="Enable ICT-based trading strategy")
+                
+                # Try to get actual bot status
+                try:
+                    import trading_bot
+                    bot_status = trading_bot.get_bot_status()
+                    
+                    # Check if running key exists in bot_status
+                    if "running" in bot_status:
+                        bot_running = bot_status["running"]
+                    elif "status" in bot_status:
+                        bot_running = bot_status["status"] == "Running"
+                    else:
+                        bot_running = False
+                except Exception as e:
+                    st.warning(f"Could not connect to trading bot: {str(e)}")
+                    bot_running = False
+                
+                if bot_running:
+                    if st.button("Stop Trading Bot"):
+                        try:
+                            import trading_bot
+                            trading_bot.stop_bot()
+                            st.success("Trading bot stopped")
+                            time.sleep(1)  # Brief pause to let the bot stop
+                            st.rerun()  # Rerun the app to reflect the new status
+                        except Exception as e:
+                            st.error(f"Error stopping trading bot: {e}")
+                else:
+                    if st.button("Start Trading Bot"):
+                        try:
+                            import trading_bot
+                            trading_bot.start_bot(
+                                strategy="Smart Money Concepts",
+                                position_size=risk_per_trade,  # Use the slider value
+                                stop_loss=5,     # 5% stop loss
+                                take_profit=10,  # 10% take profit
+                                symbols=[symbol],
+                                timeframe=timeframe,
+                                use_ict=use_ict
+                            )
+                            st.success("Trading bot started")
+                            time.sleep(1)  # Brief pause to let the bot start
+                            st.rerun()  # Rerun the app to reflect the new status
+                        except Exception as e:
+                            st.error(f"Error starting trading bot: {e}")
+            
+            with col2:
+                risk_per_trade = st.slider("Risk Per Trade (%)", min_value=1, max_value=10, value=2)
+                position_size_pct = st.slider("Position Size (%)", min_value=5, max_value=50, value=10)
+                
+                # Show bot status
+                if bot_running:
+                    st.success("Bot Status: RUNNING")
+                else:
+                    st.error("Bot Status: STOPPED")
+            
+            # Display current positions and trade history
+            st.subheader("Open Positions")
+            try:
+                import trading_bot
+                positions = trading_bot.get_open_positions()
+                if positions:
+                    positions_df = pd.DataFrame(positions)
+                    st.dataframe(positions_df)
+                else:
+                    st.info("No open positions")
+            except Exception as e:
+                st.error(f"Error getting positions: {e}")
+            
+            st.subheader("Trade History")
+            try:
+                import trading_bot
+                history = trading_bot.get_trade_history()
+                if history:
+                    history_df = pd.DataFrame(history)
+                    st.dataframe(history_df)
+                else:
+                    st.info("No trade history available")
+            except Exception as e:
+                st.error(f"Error getting trade history: {e}")
+            
+        with tab3:
+            # ICT Strategy Tab
+            st.subheader("Inner Circle Trader (ICT) Strategy")
+            
+            # Explain the ICT strategy
+            st.markdown("""
+            ### ICT Smart Money Concepts
+            
+            This strategy is based on the Inner Circle Trader (ICT) methodology, which focuses on identifying 
+            how institutional traders (smart money) manipulate and move the markets. The key concepts include:
+            
+            1. **Market Structure Analysis**: Identify Long-Term (LTH/LTL), Intermediate (IH/IL), and Short-Term (STH/STL) structure points
+            2. **Break of Structure (BOS)**: Major trend changes when LTH/LTL levels are broken
+            3. **Change of Character (CHoCH)**: Potential shift in market behavior
+            4. **Liquidity Sweeps**: Stop hunts and liquidity grabs before true moves
+            5. **New York Kill Zones**: Trading during institutional hours (7-10 AM EST and 2-4 PM EST)
+            
+            The strategy uses a multi-timeframe approach and only takes trades when all conditions align.
+            """)
+            
+            # ICT Strategy settings
+            st.subheader("ICT Strategy Settings")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                use_ict_strategy = st.checkbox("Enable ICT Strategy", value=True, help="Use ICT principles for trading")
+                check_ny_zones = st.checkbox("Enforce NY Kill Zones", value=True, help="Only trade during NY trading hours")
+            
+            with col2:
+                risk_reward_ratio = st.slider("Risk:Reward Ratio", min_value=1.0, max_value=5.0, value=2.0, step=0.1)
+                required_bias_match = st.checkbox("Require HTF Bias Match", value=True, help="Daily and 4H/1H bias must match")
+            
+            # Run ICT analysis if enabled
+            if use_ict_strategy:
+                st.subheader("ICT Analysis Results")
+                
+                try:
+                    # Import ICT strategy components
+                    from ict_strategy import (
+                        convert_to_ny_time, determine_daily_bias, confirm_htf_bias,
+                        detect_liquidity_sweeps, find_entry_mss, calculate_sl_tp,
+                        check_ny_kill_zones, ict_trading_system, generate_sample_data
+                    )
+                    
+                    # Convert data to candles and dataframes for different timeframes
+                    candles = to_candle_list(data)
+                    df = data.copy()
+                    
+                    # Create multi-timeframe data
+                    # For demo, we'll just use the same data with different frequencies
+                    # In a real application, you would fetch data for each timeframe
+                    timeframes = {
+                        '1d': df.resample('1D', on='date').agg({
+                            'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum'
+                        }).dropna(),
+                        '4h': df.resample('4H', on='date').agg({
+                            'open': 'first', 'high': 'max', 'low': 'min', 'close': 'last', 'volume': 'sum'
+                        }).dropna(),
+                        '1h': df,  # Assuming the current data is 1h
+                        '15m': None,
+                        '5m': None
+                    }
+                    
+                    # For 15m and 5m, generate sample data since we may not have it
+                    if not timeframes['15m'] or not timeframes['5m']:
+                        sample_data = generate_sample_data(symbol, ['15m', '5m'])
+                        timeframes['15m'] = sample_data.get('15m', pd.DataFrame())
+                        timeframes['5m'] = sample_data.get('5m', pd.DataFrame())
+                    
+                    # Run ICT analysis
+                    ict_result = ict_trading_system(
+                        timeframes['1d'], timeframes['4h'], timeframes['1h'],
+                        timeframes['15m'], timeframes['5m'], symbol
+                    )
+                    
+                    # Display ICT analysis results
+                    col1, col2, col3 = st.columns(3)
+                    
+                    with col1:
+                        st.metric("Daily Bias", ict_result['daily_bias'])
+                        st.metric("4H Bias", ict_result['bias_4h'])
+                        st.metric("1H Bias", ict_result['bias_1h'])
+                    
+                    with col2:
+                        st.metric("Liquidity Sweep", ict_result['liquidity_sweep'])
+                        st.metric("Market Structure Shift", ict_result['market_structure_shift'])
+                        st.metric("In NY Kill Zone", "Yes" if ict_result['in_ny_kill_zone'] else "No")
+                    
+                    with col3:
+                        st.metric("HTF Confirms Daily", "Yes" if ict_result['htf_confirms_daily'] else "No")
+                        st.metric("Trade Signal", ict_result['trade_direction'] if ict_result['take_trade'] else "None")
+                        
+                        if ict_result['take_trade']:
+                            sl = ict_result['stop_loss']
+                            tp = ict_result['take_profit']
+                            st.metric("Stop Loss", f"${sl:.2f}")
+                            st.metric("Take Profit", f"${tp:.2f}")
+                    
+                    # Display trade recommendation
+                    if ict_result['take_trade']:
+                        trade_direction = ict_result['trade_direction']
+                        st.success(f"✅ ICT Strategy recommends a {trade_direction} trade on {symbol}")
+                        
+                        # Calculate position size
+                        account_size = 10000  # Default account size
+                        current_price = df['close'].iloc[-1]
+                        stop_loss = ict_result['stop_loss']
+                        risk_amount = account_size * 0.01  # 1% risk
+                        
+                        price_diff = abs(current_price - stop_loss)
+                        position_size = risk_amount / price_diff
+                        
+                        st.info(f"Suggested position size: {position_size:.6f} {symbol.replace('USDT', '')}")
+                    else:
+                        st.warning("⚠️ ICT Strategy does not recommend a trade at this time")
+                        
+                        # Explain why no trade is recommended
+                        reasons = []
+                        if not ict_result['htf_confirms_daily']:
+                            reasons.append("HTF bias does not confirm daily bias")
+                        if ict_result['liquidity_sweep'] == "No Sweep":
+                            reasons.append("No liquidity sweep detected")
+                        if ict_result['market_structure_shift'] == "No MSS":
+                            reasons.append("No market structure shift detected")
+                        if not ict_result['in_ny_kill_zone'] and check_ny_zones:
+                            reasons.append("Not in New York kill zone")
+                            
+                        if reasons:
+                            st.markdown("**Reasons:**")
+                            for reason in reasons:
+                                st.markdown(f"- {reason}")
+                
+                except Exception as e:
+                    st.error(f"Error running ICT analysis: {e}")
+                    st.error(f"Detailed error: {str(e)}")
+        
+        with tab4:
+            # Raw data tab
+            st.subheader("Raw Market Data")
+            st.dataframe(data)
+            
+            # Allow download as CSV
+            csv = data.to_csv(index=False)
+            st.download_button(
+                label="Download CSV",
+                data=csv,
+                file_name=f"{symbol}_{timeframe}_data.csv",
+                mime="text/csv"
+            )
+        
+        with tab5:
+            # About tab
+            st.subheader("About This App")
+            st.markdown("""
+            ### SMC-Algo-Trading
+            
+            This application implements Smart Money Concepts (SMC) and Inner Circle Trader (ICT) principles 
+            for algorithmic trading. It provides:
+            
+            - Advanced market structure detection
+            - ICT-based trading strategies
+            - Multi-timeframe analysis
+            - Position sizing calculator
+            - Automated trading capabilities
+            
+            #### Key Features
+            
+            1. **Market Structure Analysis**: Identifies LTH/LTL, IH/IL, and STH/STL
+            2. **Break of Structure Detection**: Identifies trend changes
+            3. **ICT Strategy Implementation**: Based on institutional trading principles
+            4. **Trading Dashboard**: Manage trading bot and positions
+            5. **Real-time Data**: Updates with latest market data
+            
+            #### References
+            
+            - Inner Circle Trader (ICT) methodology
+            - Smart Money Concepts (SMC) trading framework
+            """)
+            
+            # Credits
+            st.markdown("---")
+            st.markdown("Created with Streamlit and Python")
+            st.markdown("© 2025 SMC-Algo-Trading")
+    else:
+        st.error("Failed to fetch market data. Please check your connection and try again.")
+    
+    # Add a refresh button
+    if st.sidebar.button("Refresh Data"):
+        st.rerun()
+    
+    # Add information about the project
+    st.sidebar.markdown("---")
+    st.sidebar.header("About")
+    st.sidebar.info(
+        "SMC-Algo-Trading is a Python library for "
+        "building trading bots following Smart Money Concepts (SMC)."
+    )
+    st.sidebar.markdown("[GitHub Repository](https://github.com/yourusername/SMC-Algo-Trading)") 
